@@ -5,14 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.mjs",
     "build": "vp pack src/server.ts -f esm -d dist",
-    "check": "vp check package.json tsconfig.json src"
+    "check": "vp check package.json tsconfig.json src",
+    "db:check": "node src/scripts/check-db.mjs"
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",
     "@fastify/swagger": "^9.5.1",
     "@fastify/swagger-ui": "^5.2.2",
     "@peruvigia/shared": "workspace:*",
-    "fastify": "^5.6.1"
+    "fastify": "^5.6.1",
+    "pg": "^8.20.0"
   }
 }

@@ -7,13 +7,16 @@
     "dev:web": "vp run --filter @peruvigia/web dev",
     "dev:api": "vp run --filter @peruvigia/api dev",
     "build": "vp run -r build",
-    "check": "vp run -r check"
+    "check": "vp run -r check",
+    "start:api": "pnpm --filter @peruvigia/api start",
+    "db:check": "pnpm --filter @peruvigia/api db:check"
   },
   "devDependencies": {
     "@types/node": "^24.6.0",
     "tsup": "^8.5.0",
     "tsx": "^4.20.5",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite-plus": "0.1.14"
   },
   "packageManager": "pnpm@10.16.1"
 }

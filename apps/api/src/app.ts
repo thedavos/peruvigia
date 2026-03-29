@@ -7,8 +7,26 @@ export async function buildApp() {
     logger: true,
   });
 
+  const allowedOrigins = [
+    "http://localhost:4321",
+    "http://127.0.0.1:4321",
+    ...(process.env.WEB_URL ? [process.env.WEB_URL] : []),
+  ];
+
   await app.register(import("@fastify/cors"), {
-    origin: ["http://localhost:4321", "http://127.0.0.1:4321"],
+    origin(origin, callback) {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error("Origin not allowed"), false);
+    },
   });
 
   await app.register(import("@fastify/swagger"), {
