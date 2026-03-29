@@ -1,0 +1,19 @@
+{
+  "name": "peruvigia",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vp run --filter \"./apps/*\" dev",
+    "dev:web": "vp run --filter @peruvigia/web dev",
+    "dev:api": "vp run --filter @peruvigia/api dev",
+    "build": "vp run -r build",
+    "check": "vp run -r check"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.0",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@10.16.1"
+}

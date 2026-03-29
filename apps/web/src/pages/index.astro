@@ -1,0 +1,50 @@
+---
+import HealthStatus from "../components/HealthStatus.vue";
+import "../styles/global.css";
+
+const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL ?? "http://127.0.0.1:3001";
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Peruvigia</title>
+    <meta
+      name="description"
+      content="Bootstrap base del MVP de Vigia con Astro, Vue, Fastify y contratos compartidos."
+    />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div class="copy-column">
+          <p class="kicker">VIG-6 / Bootstrap del monorepo</p>
+          <h1>Peruvigia arranca con una base Node end-to-end lista para crecer.</h1>
+          <p class="lede">
+            Astro y Vue sostienen la experiencia web, Fastify expone la API y un contrato
+            compartido en Zod mantiene el handshake estable entre ambos lados.
+          </p>
+          <div class="chip-row">
+            <span class="chip">Astro + Vue</span>
+            <span class="chip">Fastify + Swagger</span>
+            <span class="chip">pnpm workspace</span>
+            <span class="chip">Vite+ check</span>
+          </div>
+        </div>
+
+        <div class="panel-column">
+          <HealthStatus client:load apiBaseUrl={apiBaseUrl} />
+          <section class="info-card">
+            <p class="eyebrow">Contrato compartido</p>
+            <p>
+              La UI valida la respuesta de <code>/health</code> usando el mismo schema Zod que
+              produce la API.
+            </p>
+          </section>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
+
