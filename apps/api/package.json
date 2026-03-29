@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "start": "node dist/server.mjs",
+    "start": "node dist/server.js",
     "build": "tsup src/server.ts --format esm --out-dir dist --clean",
     "check": "vp check package.json tsconfig.json src",
     "db:check": "node src/scripts/check-db.mjs"
