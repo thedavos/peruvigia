@@ -1,16 +1,18 @@
 import Fastify from "fastify";
 
+import { getEnv } from "./env.js";
 import { registerHealthRoutes } from "./routes/health.js";
 
 export async function buildApp() {
   const app = Fastify({
     logger: true,
   });
+  const env = getEnv();
 
   const allowedOrigins = [
     "http://localhost:4321",
     "http://127.0.0.1:4321",
-    ...(process.env.WEB_URL ? [process.env.WEB_URL] : []),
+    ...(env.WEB_URL ? [env.WEB_URL] : []),
   ];
 
   await app.register(import("@fastify/cors"), {

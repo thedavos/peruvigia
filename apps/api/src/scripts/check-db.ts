@@ -1,11 +1,9 @@
 import { Client } from "pg";
 
-async function main() {
-  const connectionString = process.env.DATABASE_URL;
+import { requireDatabaseUrl } from "../env.js";
 
-  if (!connectionString) {
-    throw new Error("DATABASE_URL is required to run the PostgreSQL connectivity check.");
-  }
+async function main() {
+  const connectionString = requireDatabaseUrl();
 
   const client = new Client({
     connectionString,

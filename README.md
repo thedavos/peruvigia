@@ -22,6 +22,9 @@ pnpm build
 pnpm check
 pnpm start:api
 pnpm db:check
+pnpm db:generate
+pnpm db:migrate
+pnpm db:studio
 ```
 
 El proyecto declara `vite-plus` localmente, asi que los scripts funcionan sin requerir un `vp`
@@ -68,11 +71,37 @@ Comandos sugeridos:
 - `api` build: `pnpm --filter @peruvigia/api build`
 - `api` start: `pnpm --filter @peruvigia/api start`
 - prueba PostgreSQL: `pnpm db:check`
+- generar migraciones: `pnpm db:generate`
+- aplicar migraciones: `pnpm db:migrate`
 
 Variables minimas por servicio:
 
 - `web`: `API_URL`
 - `api`: `PORT`, `DATABASE_URL`, `WEB_URL`, `OLLAMA_BASE_URL`
+
+## Base de datos
+
+La capa de datos del MVP vive en `apps/api` y usa `drizzle-orm` con PostgreSQL.
+
+Flujo recomendado:
+
+```bash
+pnpm db:generate
+pnpm db:migrate
+pnpm db:check
+```
+
+La primera migracion crea las tablas base del MVP:
+
+- `people`
+- `source_records`
+- `signals`
+- `entities`
+- `person_entity_links`
+- `score_snapshots`
+- `search_aliases`
+
+El modelo y sus relaciones estan documentados en `docs/data-model.md`.
 
 ## Notas de tooling
 

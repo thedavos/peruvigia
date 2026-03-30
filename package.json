@@ -9,7 +9,10 @@
     "build": "vp run -r build",
     "check": "vp run -r check",
     "start:api": "pnpm --filter @peruvigia/api start",
-    "db:check": "pnpm --filter @peruvigia/api db:check"
+    "db:check": "pnpm --filter @peruvigia/api db:check",
+    "db:generate": "pnpm --filter @peruvigia/api db:generate",
+    "db:migrate": "pnpm --filter @peruvigia/api db:migrate",
+    "db:studio": "pnpm --filter @peruvigia/api db:studio"
   },
   "devDependencies": {
     "@types/node": "^24.6.0",

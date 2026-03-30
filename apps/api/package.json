@@ -8,14 +8,23 @@
     "start": "node dist/server.js",
     "build": "pnpm -C ../.. --filter @peruvigia/shared run build && tsup src/server.ts --format esm --out-dir dist --clean",
     "check": "vp check package.json tsconfig.json src",
-    "db:check": "node src/scripts/check-db.mjs"
+    "db:check": "node --import tsx src/scripts/check-db.ts",
+    "db:generate": "drizzle-kit generate --config=drizzle.config.ts",
+    "db:migrate": "node --import tsx src/scripts/migrate-db.ts",
+    "db:studio": "drizzle-kit studio --config=drizzle.config.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",
     "@fastify/swagger": "^9.5.1",
     "@fastify/swagger-ui": "^5.2.2",
     "@peruvigia/shared": "workspace:*",
+    "drizzle-orm": "^0.45.2",
     "fastify": "^5.6.1",
-    "pg": "^8.20.0"
+    "pg": "^8.20.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.20.0",
+    "drizzle-kit": "^0.31.10"
   }
 }
