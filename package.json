@@ -14,7 +14,8 @@
     "db:generate": "pnpm --filter @peruvigia/api db:generate",
     "db:migrate": "pnpm --filter @peruvigia/api db:migrate",
     "db:studio": "pnpm --filter @peruvigia/api db:studio",
-    "sync:contraloria": "pnpm --filter @peruvigia/api sync:contraloria"
+    "sync:contraloria": "pnpm --filter @peruvigia/api sync:contraloria",
+    "sync:dji": "pnpm --filter @peruvigia/api sync:dji"
   },
   "devDependencies": {
     "@types/node": "^24.6.0",

@@ -13,7 +13,8 @@
     "db:generate": "drizzle-kit generate --config=drizzle.config.ts",
     "db:migrate": "node --import tsx src/scripts/migrate-db.ts",
     "db:studio": "drizzle-kit studio --config=drizzle.config.ts",
-    "sync:contraloria": "pnpm -C ../.. --filter @peruvigia/shared run build && node --import tsx src/scripts/sync-contraloria.ts"
+    "sync:contraloria": "pnpm -C ../.. --filter @peruvigia/shared run build && node --import tsx src/scripts/sync-contraloria.ts",
+    "sync:dji": "pnpm -C ../.. --filter @peruvigia/shared run build && node --import tsx src/scripts/sync-dji.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",

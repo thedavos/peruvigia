@@ -34,8 +34,8 @@ const idColumn = (name = "id") =>
     .default(sql`gen_random_uuid()`)
     .primaryKey();
 
-// Perfil canonico de la persona investigada. Aqui convergen los hallazgos
-// y atributos de identidad que usara el producto como representacion principal.
+// Registro canonico de personas conocidas por el sistema. Incluye perfiles
+// investigados y personas relacionadas descubiertas desde fuentes publicas.
 export const people = pgTable(
   "people",
   {
@@ -177,6 +177,37 @@ export const personEntityLinks = pgTable(
   ],
 );
 
+// Relacion muchos-a-muchos entre personas, con trazabilidad a la fuente que
+// justifico el vinculo declarado entre ambas.
+export const personPersonLinks = pgTable(
+  "person_person_links",
+  {
+    id: idColumn(),
+    personId: uuid("person_id")
+      .notNull()
+      .references(() => people.id, {
+        onDelete: "cascade",
+      }),
+    relatedPersonId: uuid("related_person_id")
+      .notNull()
+      .references(() => people.id, {
+        onDelete: "cascade",
+      }),
+    linkType: text("link_type").notNull(),
+    sourceRecordId: uuid("source_record_id").references(() => sourceRecords.id, {
+      onDelete: "set null",
+    }),
+    startDate: date("start_date"),
+    endDate: date("end_date"),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>().default(emptyJsonb).notNull(),
+  },
+  (table) => [
+    index("person_person_links_person_id_idx").on(table.personId),
+    index("person_person_links_related_person_id_idx").on(table.relatedPersonId),
+    index("person_person_links_link_type_idx").on(table.linkType),
+  ],
+);
+
 // Fotografia versionada del score explicable. Permite recalcular sin perder
 // historial ni mezclar el score con los datos crudos.
 export const scoreSnapshots = pgTable(
@@ -247,6 +278,7 @@ export const schema = {
   signals,
   entities,
   personEntityLinks,
+  personPersonLinks,
   scoreSnapshots,
   searchAliases,
 };

@@ -48,6 +48,63 @@ export const ContraloriaStatusResponseSchema = z.object({
   contextSignals: z.array(ContraloriaStatusSignalSchema),
 });
 
+export const DjiLinkTypeValues = [
+  "employment",
+  "commercial",
+  "family",
+  "guild",
+  "board_membership",
+] as const;
+
+export const DjiLinkTypeSchema = z.enum(DjiLinkTypeValues);
+
+export const DjiEvidenceSchema = z.object({
+  sourceRecordId: z.string().uuid(),
+  declarationExternalId: z.string().min(1),
+  sourceUrl: z.string().url().nullable(),
+  observedAt: z.iso.datetime(),
+});
+
+export const DjiEntityLinkSchema = z.object({
+  linkId: z.string().uuid(),
+  linkType: DjiLinkTypeSchema,
+  detail: z.string().nullable(),
+  startDate: z.string().nullable(),
+  endDate: z.string().nullable(),
+  entity: z.object({
+    entityId: z.string().uuid(),
+    entityType: z.string().min(1),
+    name: z.string().min(1),
+    externalIdentifier: z.string().nullable(),
+  }),
+  evidence: DjiEvidenceSchema,
+});
+
+export const DjiPersonLinkSchema = z.object({
+  linkId: z.string().uuid(),
+  linkType: DjiLinkTypeSchema,
+  detail: z.string().nullable(),
+  startDate: z.string().nullable(),
+  endDate: z.string().nullable(),
+  relatedPerson: z.object({
+    personId: z.string().uuid(),
+    fullName: z.string().min(1),
+    documentNumber: z.string().nullable(),
+  }),
+  evidence: DjiEvidenceSchema,
+});
+
+export const DjiContextResponseSchema = z.object({
+  personId: z.string().uuid(),
+  entityLinks: z.array(DjiEntityLinkSchema),
+  personLinks: z.array(DjiPersonLinkSchema),
+});
+
 export type ContraloriaSignalType = z.infer<typeof ContraloriaSignalTypeSchema>;
 export type ContraloriaStatusSignal = z.infer<typeof ContraloriaStatusSignalSchema>;
 export type ContraloriaStatusResponse = z.infer<typeof ContraloriaStatusResponseSchema>;
+export type DjiLinkType = z.infer<typeof DjiLinkTypeSchema>;
+export type DjiEvidence = z.infer<typeof DjiEvidenceSchema>;
+export type DjiEntityLink = z.infer<typeof DjiEntityLinkSchema>;
+export type DjiPersonLink = z.infer<typeof DjiPersonLinkSchema>;
+export type DjiContextResponse = z.infer<typeof DjiContextResponseSchema>;
