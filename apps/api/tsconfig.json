@@ -1,7 +1,15 @@
 {
   "extends": "../../packages/config/tsconfig/node.json",
   "compilerOptions": {
-    "rootDir": "./src"
+    "baseUrl": ".",
+    "paths": {
+      "@api/*": ["src/*"],
+      "@shared": ["../../packages/shared/src/index.ts"],
+      "@shared/*": ["../../packages/shared/src/*"],
+      "@web/*": ["../web/src/*"],
+      "~/*": ["src/*"]
+    },
+    "types": ["node", "vitest/globals"]
   },
   "include": ["src/**/*.ts"]
 }

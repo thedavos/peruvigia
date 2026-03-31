@@ -1,6 +1,14 @@
 {
   "extends": "../../packages/config/tsconfig/web.json",
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@api/*": ["../api/src/*"],
+      "@shared": ["../../packages/shared/src/index.ts"],
+      "@shared/*": ["../../packages/shared/src/*"],
+      "@web/*": ["src/*"],
+      "~/*": ["src/*"]
+    },
     "types": ["astro/client", "vite/client"]
   },
   "include": ["src/**/*", "astro.config.mjs"]

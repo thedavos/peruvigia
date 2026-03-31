@@ -8,3 +8,4 @@ coverage
 .turbo
 .vscode
 .pnpm-store
+.idea

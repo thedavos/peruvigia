@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 
-import { HealthResponseSchema, type HealthResponse } from "@peruvigia/shared";
+import { HealthResponseSchema, type HealthResponse } from "@shared";
 
 const props = defineProps<{
   apiBaseUrl: string;
