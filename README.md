@@ -20,12 +20,27 @@ pnpm dev
 pnpm dev
 pnpm build
 pnpm check
+pnpm test:api
 pnpm start:api
+pnpm sync:contraloria
 pnpm db:check
 pnpm db:generate
 pnpm db:migrate
 pnpm db:studio
 ```
+
+Sincronizacion de Contraloria:
+
+```bash
+pnpm sync:contraloria
+pnpm sync:contraloria --report-url "https://www.gob.pe/..."
+pnpm sync:contraloria --input-dir ./tmp/contraloria
+pnpm sync:contraloria --report-url "https://www.gob.pe/..." --allow-backfill
+```
+
+Por defecto, el importador rechaza publicaciones mas antiguas que la ultima fecha ya importada en
+`source_records`. Usa `--allow-backfill` solo cuando quieras cargar historico de forma
+intencional.
 
 El proyecto declara `vite-plus` localmente, asi que los scripts funcionan sin requerir un `vp`
 global. Si ya lo tienes instalado globalmente, tambien puedes seguir usando `vp run ...`.
@@ -71,6 +86,7 @@ Comandos sugeridos:
 - `api` build: `pnpm --filter @peruvigia/api build`
 - `api` start: `pnpm --filter @peruvigia/api start`
 - prueba PostgreSQL: `pnpm db:check`
+- sincronizar Contraloría: `pnpm sync:contraloria`
 - generar migraciones: `pnpm db:generate`
 - aplicar migraciones: `pnpm db:migrate`
 
