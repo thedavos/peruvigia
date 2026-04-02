@@ -23,6 +23,7 @@ pnpm check
 pnpm test:api
 pnpm start:api
 pnpm sync:contraloria
+pnpm sync:dji
 pnpm db:check
 pnpm db:generate
 pnpm db:migrate
@@ -41,6 +42,23 @@ pnpm sync:contraloria --report-url "https://www.gob.pe/..." --allow-backfill
 Por defecto, el importador rechaza publicaciones mas antiguas que la ultima fecha ya importada en
 `source_records`. Usa `--allow-backfill` solo cuando quieras cargar historico de forma
 intencional.
+
+Sincronizacion de DJI:
+
+```bash
+pnpm sync:dji
+pnpm sync:dji --input-dir ./tmp/dji
+pnpm sync:dji --allow-backfill
+```
+
+El importador de DJI resuelve distribuciones oficiales desde metadata del catalogo de datos
+abiertos y prioriza `json > csv > xml`. Para fixtures offline, `--input-dir` debe contener los
+archivos `declarations.*`, `employment.*`, `commercial.*`, `family.*`, `guild.*` y
+`board_membership.*`.
+
+`declarations.*` es obligatorio. Los demas son opcionales y se importan solo si la fuente oficial
+o tu carpeta offline realmente los tiene disponibles. Esto permite correr el ETL con la oferta
+actual verificada del portal, donde hoy estan claros `declarations`, `employment` y `family`.
 
 El proyecto declara `vite-plus` localmente, asi que los scripts funcionan sin requerir un `vp`
 global. Si ya lo tienes instalado globalmente, tambien puedes seguir usando `vp run ...`.
@@ -87,6 +105,7 @@ Comandos sugeridos:
 - `api` start: `pnpm --filter @peruvigia/api start`
 - prueba PostgreSQL: `pnpm db:check`
 - sincronizar Contraloría: `pnpm sync:contraloria`
+- sincronizar DJI: `pnpm sync:dji`
 - generar migraciones: `pnpm db:generate`
 - aplicar migraciones: `pnpm db:migrate`
 
@@ -107,17 +126,25 @@ pnpm db:migrate
 pnpm db:check
 ```
 
-La primera migracion crea las tablas base del MVP:
+Las migraciones del MVP crean estas tablas base:
 
 - `people`
 - `source_records`
 - `signals`
 - `entities`
 - `person_entity_links`
+- `person_person_links`
 - `score_snapshots`
 - `search_aliases`
 
 El modelo y sus relaciones estan documentados en `docs/data-model.md`.
+
+## API
+
+Rutas disponibles hoy para contexto por persona:
+
+- `GET /people/:personId/contraloria-status`
+- `GET /people/:personId/dji-context`
 
 ## Notas de tooling
 
