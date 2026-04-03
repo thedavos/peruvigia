@@ -9,7 +9,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "#api": path.resolve(apiRoot, "src"),
-      "@shared": path.resolve(apiRoot, "../../packages/shared/src"),
+      "@peruvigia/shared": path.resolve(apiRoot, "../../packages/shared/src"),
     },
   },
   pack: {

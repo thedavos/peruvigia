@@ -4,8 +4,8 @@
     "baseUrl": ".",
     "paths": {
       "#api/*": ["src/*"],
-      "@shared": ["../../packages/shared/src/index.ts"],
-      "@shared/*": ["../../packages/shared/src/*"],
+      "@peruvigia/shared": ["../../packages/shared/src/index.ts"],
+      "@peruvigia/shared/*": ["../../packages/shared/src/*"],
       "@web/*": ["../web/src/*"]
     },
     "types": ["node", "vite-plus/test/globals"]

@@ -13,7 +13,7 @@ export default defineConfig({
     resolve: {
       alias: {
         "@api": path.resolve(webRoot, "../api/src"),
-        "@shared": path.resolve(webRoot, "../../packages/shared/src"),
+        "@peruvigia/shared": path.resolve(webRoot, "../../packages/shared/src"),
         "@web": path.resolve(webRoot, "src"),
         "~": path.resolve(webRoot, "src"),
       },

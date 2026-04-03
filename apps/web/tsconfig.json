@@ -4,8 +4,8 @@
     "baseUrl": ".",
     "paths": {
       "@api/*": ["../api/src/*"],
-      "@shared": ["../../packages/shared/src/index.ts"],
-      "@shared/*": ["../../packages/shared/src/*"],
+      "@peruvigia/shared": ["../../packages/shared/src/index.ts"],
+      "@peruvigia/shared/*": ["../../packages/shared/src/*"],
       "@web/*": ["src/*"],
       "~/*": ["src/*"]
     },
