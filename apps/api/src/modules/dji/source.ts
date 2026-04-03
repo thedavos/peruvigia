@@ -406,7 +406,7 @@ function parseXmlRows(text: string) {
 
       return Object.fromEntries(
         fields.map((fieldMatch) => [fieldMatch[1] ?? "", parseXmlScalar(fieldMatch[2] ?? "")]),
-      );
+      ) as Record<string, unknown>;
     })
     .filter((row): row is Record<string, unknown> => row != null);
 }
