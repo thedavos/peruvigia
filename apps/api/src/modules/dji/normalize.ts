@@ -5,8 +5,8 @@ import {
   normalizeName,
   normalizeWhitespace,
   slugify,
-} from "@shared";
-import { hashNormalizedPayload } from "@shared/node";
+} from "@peruvigia/shared";
+import { hashNormalizedPayload } from "@peruvigia/shared/node";
 
 import type {
   DjiDatasetKind,

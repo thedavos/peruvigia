@@ -1,4 +1,9 @@
-import type { DjiContextResponse, DjiEntityLink, DjiLinkType, DjiPersonLink } from "@shared";
+import type {
+  DjiContextResponse,
+  DjiEntityLink,
+  DjiLinkType,
+  DjiPersonLink,
+} from "@peruvigia/shared";
 
 export const DJI_SOURCE_TYPE = "pcm_dji";
 

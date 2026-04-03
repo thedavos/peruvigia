@@ -1,7 +1,7 @@
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 
-import { db, pool } from "../db/index.js";
-import { requireDatabaseUrl } from "../env.js";
+import { db, pool } from "#api/db/index.js";
+import { requireDatabaseUrl } from "#api/env.js";
 
 requireDatabaseUrl();
 

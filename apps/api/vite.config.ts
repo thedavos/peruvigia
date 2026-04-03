@@ -8,9 +8,8 @@ const apiRoot = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   resolve: {
     alias: {
-      "@api": path.resolve(apiRoot, "src"),
+      "#api": path.resolve(apiRoot, "src"),
       "@shared": path.resolve(apiRoot, "../../packages/shared/src"),
-      "~": path.resolve(apiRoot, "src"),
     },
   },
   pack: {

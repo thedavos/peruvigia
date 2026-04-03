@@ -1,5 +1,5 @@
-import { pool } from "~/db/index.js";
-import { runContraloriaSync } from "~/modules/contraloria/service.js";
+import { pool } from "#api/db/index.js";
+import { runContraloriaSync } from "#api/modules/contraloria/service.js";
 
 type CliOptions = {
   allowBackfill?: boolean;

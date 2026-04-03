@@ -1,9 +1,9 @@
 import { and, eq, inArray, type InferSelectModel } from "drizzle-orm";
 
-import { normalizeName, slugify, stableStringify } from "@shared";
+import { normalizeName, slugify, stableStringify } from "@peruvigia/shared";
 
-import { db } from "~/db/index.js";
-import { entities, people, personEntityLinks, signals, sourceRecords } from "~/db/schema.js";
+import { db } from "#api/db/index.js";
+import { entities, people, personEntityLinks, signals, sourceRecords } from "#api/db/schema.js";
 import { CONTRALORIA_SOURCE_TYPE } from "./types.js";
 import type {
   ContraloriaSyncResult,

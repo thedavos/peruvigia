@@ -1,4 +1,4 @@
-import type { ContraloriaSignalType } from "@shared";
+import type { ContraloriaSignalType } from "@peruvigia/shared";
 
 export const CONTRALORIA_SOURCE_TYPE = "contraloria_sanciones";
 

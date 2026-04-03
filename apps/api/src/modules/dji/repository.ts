@@ -1,15 +1,15 @@
 import { and, eq, inArray, type InferSelectModel } from "drizzle-orm";
 
-import { stableStringify } from "@shared";
+import { stableStringify } from "@peruvigia/shared";
 
-import { db } from "~/db/index.js";
+import { db } from "#api/db/index.js";
 import {
   entities,
   people,
   personEntityLinks,
   personPersonLinks,
   sourceRecords,
-} from "~/db/schema.js";
+} from "#api/db/schema.js";
 import {
   DJI_SOURCE_TYPE,
   type DjiNormalizedDeclaration,

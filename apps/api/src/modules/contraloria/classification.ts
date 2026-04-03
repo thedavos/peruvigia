@@ -1,5 +1,5 @@
 import type { ContraloriaFamily, RowClassification } from "./types.js";
-import { normalizeForComparison } from "@shared";
+import { normalizeForComparison } from "@peruvigia/shared";
 
 type ClassifyInput = {
   endDate: string | null;

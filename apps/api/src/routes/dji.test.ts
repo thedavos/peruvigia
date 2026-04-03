@@ -1,4 +1,4 @@
-import { buildApp } from "~/app.js";
+import { buildApp } from "#api/app.js";
 
 test("GET /people/:personId/dji-context returns declared entity and person links", async () => {
   const app = await buildApp({

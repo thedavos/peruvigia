@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "imports": {
+    "#api/*": "./src/*"
+  },
   "scripts": {
     "dev": "vp exec tsx watch src/server.ts",
     "start": "node dist/server.js",

@@ -7,10 +7,10 @@ import {
   type ContraloriaSignalType,
   type ContraloriaStatusResponse,
   type ContraloriaStatusSignal,
-} from "@shared";
+} from "@peruvigia/shared";
 
-import { db } from "~/db/index.js";
-import { people, signals, sourceRecords } from "~/db/schema.js";
+import { db } from "#api/db/index.js";
+import { people, signals, sourceRecords } from "#api/db/schema.js";
 import { CONTRALORIA_SOURCE_TYPE } from "./types.js";
 import { persistContraloriaRecords } from "./repository.js";
 import { acquireContraloriaAttachments } from "./source.js";

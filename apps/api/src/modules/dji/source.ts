@@ -1,7 +1,12 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
-import { compactText, normalizeForComparison, normalizeKey, normalizeWhitespace } from "@shared";
+import {
+  compactText,
+  normalizeForComparison,
+  normalizeKey,
+  normalizeWhitespace,
+} from "@peruvigia/shared";
 
 import {
   DJI_CATALOG_URLS,

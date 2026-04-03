@@ -1,6 +1,6 @@
 import { Client } from "pg";
 
-import { requireDatabaseUrl } from "../env.js";
+import { requireDatabaseUrl } from "#api/env.js";
 
 async function main() {
   const connectionString = requireDatabaseUrl();

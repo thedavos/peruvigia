@@ -6,8 +6,8 @@ import {
   normalizeKey,
   normalizeName,
   normalizeWhitespace,
-} from "@shared";
-import { hashNormalizedPayload } from "@shared/node";
+} from "@peruvigia/shared";
+import { hashNormalizedPayload } from "@peruvigia/shared/node";
 
 import { classifySanction } from "./classification.js";
 import type {

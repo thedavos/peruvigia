@@ -5,16 +5,16 @@ import {
   formatIsoDate,
   readRecordString,
   type DjiContextResponse,
-} from "@shared";
+} from "@peruvigia/shared";
 
-import { db } from "~/db/index.js";
+import { db } from "#api/db/index.js";
 import {
   entities,
   people,
   personEntityLinks,
   personPersonLinks,
   sourceRecords,
-} from "~/db/schema.js";
+} from "#api/db/schema.js";
 import { normalizeDjiDatasets } from "./normalize.js";
 import { persistDjiDeclarations } from "./repository.js";
 import { acquireDjiDatasets } from "./source.js";

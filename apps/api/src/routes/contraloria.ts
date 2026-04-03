@@ -1,8 +1,8 @@
 import type { FastifyInstance } from "fastify";
 
-import { ContraloriaSignalTypeValues, ContraloriaStatusResponseSchema } from "@shared";
+import { ContraloriaSignalTypeValues, ContraloriaStatusResponseSchema } from "@peruvigia/shared";
 
-import { getContraloriaStatus } from "~/modules/contraloria/service.js";
+import { getContraloriaStatus } from "#api/modules/contraloria/service.js";
 
 const contraloriaStatusSignalJsonSchema = {
   additionalProperties: false,

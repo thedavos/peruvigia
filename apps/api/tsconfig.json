@@ -3,11 +3,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@api/*": ["src/*"],
+      "#api/*": ["src/*"],
       "@shared": ["../../packages/shared/src/index.ts"],
       "@shared/*": ["../../packages/shared/src/*"],
-      "@web/*": ["../web/src/*"],
-      "~/*": ["src/*"]
+      "@web/*": ["../web/src/*"]
     },
     "types": ["node", "vite-plus/test/globals"]
   },

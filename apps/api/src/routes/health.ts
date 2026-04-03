@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 
-import { HealthResponseSchema } from "@shared";
+import { HealthResponseSchema } from "@peruvigia/shared";
 
 const healthResponseJsonSchema = {
   type: "object",
