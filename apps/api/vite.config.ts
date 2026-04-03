@@ -1,16 +1,24 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { defineConfig } from "vitest/config";
+import { defineConfig } from "vite-plus";
 
 const apiRoot = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   resolve: {
     alias: {
-      "@shared": path.resolve(apiRoot, "../../packages/shared/src/index.ts"),
+      "@api": path.resolve(apiRoot, "src"),
+      "@shared": path.resolve(apiRoot, "../../packages/shared/src"),
       "~": path.resolve(apiRoot, "src"),
     },
+  },
+  pack: {
+    entry: ["src/server.ts"],
+    format: ["esm"],
+    outDir: "dist",
+    clean: true,
+    sourcemap: true,
   },
   test: {
     environment: "node",

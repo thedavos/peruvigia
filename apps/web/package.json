@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "astro dev --host",
-    "build": "astro build",
+    "dev": "vp exec astro dev --host",
+    "build": "vp exec astro build",
     "check": "vp check package.json tsconfig.json astro.config.mjs src"
   },
   "dependencies": {

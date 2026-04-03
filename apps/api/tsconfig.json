@@ -9,7 +9,7 @@
       "@web/*": ["../web/src/*"],
       "~/*": ["src/*"]
     },
-    "types": ["node", "vitest/globals"]
+    "types": ["node", "vite-plus/test/globals"]
   },
   "include": ["src/**/*.ts"]
 }

@@ -4,23 +4,24 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm -C ../.. --filter @peruvigia/shared run build && tsx watch src/server.ts",
+    "dev": "vp exec tsx watch src/server.ts",
     "start": "node dist/server.js",
-    "build": "pnpm -C ../.. --filter @peruvigia/shared run build && tsup src/server.ts --format esm --out-dir dist --clean",
+    "build": "vp pack",
     "check": "vp check package.json tsconfig.json src",
-    "test": "pnpm -C ../.. --filter @peruvigia/shared run build && vp test run --config vitest.config.ts",
-    "db:check": "node --import tsx src/scripts/check-db.ts",
-    "db:generate": "drizzle-kit generate --config=drizzle.config.ts",
-    "db:migrate": "node --import tsx src/scripts/migrate-db.ts",
-    "db:studio": "drizzle-kit studio --config=drizzle.config.ts",
-    "sync:contraloria": "pnpm -C ../.. --filter @peruvigia/shared run build && node --import tsx src/scripts/sync-contraloria.ts",
-    "sync:dji": "pnpm -C ../.. --filter @peruvigia/shared run build && node --import tsx src/scripts/sync-dji.ts"
+    "test": "vp test",
+    "db:check": "vp exec tsx src/scripts/check-db.ts",
+    "db:generate": "vp exec drizzle-kit generate --config=drizzle.config.ts",
+    "db:migrate": "vp exec tsx src/scripts/migrate-db.ts",
+    "db:studio": "vp exec drizzle-kit studio --config=drizzle.config.ts",
+    "sync:contraloria": "vp exec tsx src/scripts/sync-contraloria.ts",
+    "sync:dji": "vp exec tsx src/scripts/sync-dji.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",
     "@fastify/swagger": "^9.5.1",
     "@fastify/swagger-ui": "^5.2.2",
     "@peruvigia/shared": "workspace:*",
+    "@vercel/functions": "^2.2.13",
     "drizzle-orm": "^0.45.2",
     "exceljs": "^4.4.0",
     "fastify": "^5.6.1",
@@ -29,7 +30,6 @@
   },
   "devDependencies": {
     "@types/pg": "^8.20.0",
-    "drizzle-kit": "^0.31.10",
-    "vitest": "^4.0.18"
+    "drizzle-kit": "^0.31.10"
   }
 }

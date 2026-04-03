@@ -22,20 +22,10 @@ const DATASET_KIND_KEYWORDS: Record<DjiDatasetKind, string[]> = {
   commercial: ["empresa", "empresas", "sociedad", "sociedades", "comercial", "comerciales"],
   family: ["familia", "familiares", "familiar", "parentesco"],
   guild: ["gremio", "gremios", "gremial", "gremiales"],
-  board_membership: [
-    "organo colegiado",
-    "organos colegiados",
-    "organo",
-    "colegiado",
-    "colegiados",
-  ],
+  board_membership: ["organo colegiado", "organos colegiados", "organo", "colegiado", "colegiados"],
 };
 
 const DISTRIBUTION_PRIORITY: DjiDistributionFormat[] = ["json", "csv", "xml"];
-
-function toAbsoluteUrl(candidate: string, baseUrl: string) {
-  return new URL(candidate, baseUrl).toString();
-}
 
 function normalizeDatasetTitle(value: string) {
   return normalizeForComparison(value)
@@ -88,9 +78,7 @@ function inferDatasetKind(title: string) {
     return "guild";
   }
 
-  if (
-    DATASET_KIND_KEYWORDS.board_membership.some((keyword) => normalizedTitle.includes(keyword))
-  ) {
+  if (DATASET_KIND_KEYWORDS.board_membership.some((keyword) => normalizedTitle.includes(keyword))) {
     return "board_membership";
   }
 
@@ -152,7 +140,8 @@ function normalizeCatalogEntries(payload: unknown): DjiCatalogEntry[] {
       .filter((entry): entry is DjiCatalogEntry => entry != null);
   }
 
-  const results = ((payload as { result?: { results?: unknown[] } }).result?.results ?? []) as unknown[];
+  const results = ((payload as { result?: { results?: unknown[] } }).result?.results ??
+    []) as unknown[];
   if (!Array.isArray(results)) {
     return [];
   }
@@ -168,9 +157,12 @@ function normalizeCatalogEntries(payload: unknown): DjiCatalogEntry[] {
         : [];
 
       return {
-        id: compactText(String((entry as { id?: unknown; name?: unknown }).id ?? "")) ??
+        id:
+          compactText(String((entry as { id?: unknown; name?: unknown }).id ?? "")) ??
           compactText(String((entry as { name?: unknown }).name ?? "")),
-        modifiedAt: compactText(String((entry as { metadata_modified?: unknown }).metadata_modified ?? "")),
+        modifiedAt: compactText(
+          String((entry as { metadata_modified?: unknown }).metadata_modified ?? ""),
+        ),
         resources: resources
           .map((resource) => {
             if (!resource || typeof resource !== "object") {
@@ -195,7 +187,9 @@ function selectPreferredResource(
   title: string,
 ): Pick<DjiResolvedResource, "format" | "sourceUrl"> | null {
   for (const format of DISTRIBUTION_PRIORITY) {
-    const match = resources.find((resource) => inferDistributionFormat(resource) === format && resource.url);
+    const match = resources.find(
+      (resource) => inferDistributionFormat(resource) === format && resource.url,
+    );
 
     if (match?.url) {
       return {
@@ -286,7 +280,9 @@ async function fetchCatalogEntries(fetchImpl: typeof fetch) {
 
 function parseJsonRows(payload: unknown) {
   if (Array.isArray(payload)) {
-    return payload.filter((row): row is Record<string, unknown> => !!row && typeof row === "object");
+    return payload.filter(
+      (row): row is Record<string, unknown> => !!row && typeof row === "object",
+    );
   }
 
   if (!payload || typeof payload !== "object") {
@@ -302,7 +298,9 @@ function parseJsonRows(payload: unknown) {
 
   for (const candidate of candidates) {
     if (Array.isArray(candidate)) {
-      return candidate.filter((row): row is Record<string, unknown> => !!row && typeof row === "object");
+      return candidate.filter(
+        (row): row is Record<string, unknown> => !!row && typeof row === "object",
+      );
     }
   }
 
@@ -319,9 +317,9 @@ function parseCsvRows(text: string) {
     const character = text[index] ?? "";
     const nextCharacter = text[index + 1] ?? "";
 
-    if (character === "\"") {
-      if (inQuotes && nextCharacter === "\"") {
-        currentField += "\"";
+    if (character === '"') {
+      if (inQuotes && nextCharacter === '"') {
+        currentField += '"';
         index += 1;
       } else {
         inQuotes = !inQuotes;
@@ -369,7 +367,9 @@ function parseCsvRows(text: string) {
     .map((row) =>
       Object.fromEntries(headers.map((header, index) => [header, compactText(row[index] ?? "")])),
     )
-    .filter((row) => Object.values(row).some((value) => value != null)) as Array<Record<string, unknown>>;
+    .filter((row) => Object.values(row).some((value) => value != null)) as Array<
+    Record<string, unknown>
+  >;
 }
 
 function parseXmlScalar(value: string) {
@@ -465,7 +465,9 @@ export async function acquireDjiDatasets(
   const missingKinds = DJI_REQUIRED_DATASET_KINDS.filter((kind) => !resolvedResources.has(kind));
 
   if (missingKinds.length > 0) {
-    throw new Error(`Could not resolve all DJI datasets from catalog metadata: ${missingKinds.join(", ")}`);
+    throw new Error(
+      `Could not resolve all DJI datasets from catalog metadata: ${missingKinds.join(", ")}`,
+    );
   }
 
   return await Promise.all(

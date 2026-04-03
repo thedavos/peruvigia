@@ -1,12 +1,12 @@
 import {
   compactText,
-  hashNormalizedPayload,
   normalizeDocumentNumber,
   normalizeKey,
   normalizeName,
   normalizeWhitespace,
   slugify,
 } from "@shared";
+import { hashNormalizedPayload } from "@shared/node";
 
 import type {
   DjiDatasetKind,
@@ -190,7 +190,10 @@ function resolveObservedAt(values: KeyedRow, fallback: string | null) {
   );
 }
 
-function resolveEntityName(values: KeyedRow, kind: Exclude<DjiDatasetKind, "declarations" | "family">) {
+function resolveEntityName(
+  values: KeyedRow,
+  kind: Exclude<DjiDatasetKind, "declarations" | "family">,
+) {
   const hintsByKind: Record<typeof kind, string[]> = {
     board_membership: ["organo", "colegiado"],
     commercial: ["empresa", "sociedad", "entidad", "razonsocial"],
@@ -314,10 +317,11 @@ function normalizeFamilyLinkRow(row: Record<string, unknown>) {
   }
 
   const fullName =
-    readRowString(values, ["nombrefamiliar", "familiar", "apellidosynombresfamiliar"], [
-      "familiar",
-      "pariente",
-    ]) ??
+    readRowString(
+      values,
+      ["nombrefamiliar", "familiar", "apellidosynombresfamiliar"],
+      ["familiar", "pariente"],
+    ) ??
     readNameFromComponents(values, ["familiar"]) ??
     readNameFromComponents(values, ["pariente"]) ??
     null;
@@ -402,7 +406,9 @@ export function normalizeDjiDatasets(datasets: DjiDownloadedDataset[]): DjiNorma
 
   const declarationsByJoinKey = new Map<
     string,
-    DjiNormalizedDeclaration & { rawLinksByKind: Partial<Record<DjiDatasetKind, Array<Record<string, unknown>>>> }
+    DjiNormalizedDeclaration & {
+      rawLinksByKind: Partial<Record<DjiDatasetKind, Array<Record<string, unknown>>>>;
+    }
   >();
   let skipped = 0;
 
@@ -444,7 +450,9 @@ export function normalizeDjiDatasets(datasets: DjiDownloadedDataset[]): DjiNorma
       const declaration = declarationsByJoinKey.get(normalized.joinKey);
       if (!declaration) {
         skipped += 1;
-        errors.push(`Orphan ${dataset.kind} row without matching declaration: ${normalized.joinKey}`);
+        errors.push(
+          `Orphan ${dataset.kind} row without matching declaration: ${normalized.joinKey}`,
+        );
         continue;
       }
 

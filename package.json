@@ -8,23 +8,20 @@
     "dev:api": "vp run --filter @peruvigia/api dev",
     "build": "vp run -r build",
     "check": "vp run -r check",
-    "test:api": "pnpm --filter @peruvigia/api test",
-    "start:api": "pnpm --filter @peruvigia/api start",
-    "db:check": "pnpm --filter @peruvigia/api db:check",
-    "db:generate": "pnpm --filter @peruvigia/api db:generate",
-    "db:migrate": "pnpm --filter @peruvigia/api db:migrate",
-    "db:studio": "pnpm --filter @peruvigia/api db:studio",
-    "sync:contraloria": "pnpm --filter @peruvigia/api sync:contraloria",
-    "sync:dji": "pnpm --filter @peruvigia/api sync:dji"
+    "test:api": "vp run --filter @peruvigia/api test",
+    "start:api": "vp run --filter @peruvigia/api start",
+    "db:check": "vp run --filter @peruvigia/api db:check",
+    "db:generate": "vp run --filter @peruvigia/api db:generate",
+    "db:migrate": "vp run --filter @peruvigia/api db:migrate",
+    "db:studio": "vp run --filter @peruvigia/api db:studio",
+    "sync:contraloria": "vp run --filter @peruvigia/api sync:contraloria",
+    "sync:dji": "vp run --filter @peruvigia/api sync:dji"
   },
   "devDependencies": {
     "@types/node": "^24.6.0",
-    "tsup": "^8.5.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.3",
-    "vite": "^6.4.1",
-    "vite-plus": "^0.1.14",
-    "vitest": "^4.0.18"
+    "vite-plus": "^0.1.14"
   },
   "packageManager": "pnpm@10.16.1"
 }

@@ -121,15 +121,7 @@ const djiPersonLinkJsonSchema = {
       type: "string",
     },
   },
-  required: [
-    "detail",
-    "endDate",
-    "evidence",
-    "linkId",
-    "linkType",
-    "relatedPerson",
-    "startDate",
-  ],
+  required: ["detail", "endDate", "evidence", "linkId", "linkType", "relatedPerson", "startDate"],
   type: "object",
 } as const;
 

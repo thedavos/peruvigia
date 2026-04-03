@@ -2,12 +2,12 @@ import ExcelJS from "exceljs";
 
 import {
   compactText,
-  hashNormalizedPayload,
   normalizeDocumentNumber,
   normalizeKey,
   normalizeName,
   normalizeWhitespace,
 } from "@shared";
+import { hashNormalizedPayload } from "@shared/node";
 
 import { classifySanction } from "./classification.js";
 import type {

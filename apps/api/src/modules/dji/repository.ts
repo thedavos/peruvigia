@@ -10,7 +10,12 @@ import {
   personPersonLinks,
   sourceRecords,
 } from "~/db/schema.js";
-import { DJI_SOURCE_TYPE, type DjiNormalizedDeclaration, type DjiSyncResult, type DjiSyncSummary } from "./types.js";
+import {
+  DJI_SOURCE_TYPE,
+  type DjiNormalizedDeclaration,
+  type DjiSyncResult,
+  type DjiSyncSummary,
+} from "./types.js";
 
 type DatabaseClient = typeof db;
 type TransactionClient = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -297,8 +302,13 @@ export function isSameDjiSourceRecord(
   );
 }
 
-async function loadExistingSourceRecords(databaseClient: DatabaseClient, declarations: DjiNormalizedDeclaration[]) {
-  const sourceExternalIds = [...new Set(declarations.map((declaration) => declaration.declarationExternalId))];
+async function loadExistingSourceRecords(
+  databaseClient: DatabaseClient,
+  declarations: DjiNormalizedDeclaration[],
+) {
+  const sourceExternalIds = [
+    ...new Set(declarations.map((declaration) => declaration.declarationExternalId)),
+  ];
   if (sourceExternalIds.length === 0) {
     return new Map<string, SourceRecord>();
   }
@@ -315,12 +325,18 @@ async function loadExistingSourceRecords(databaseClient: DatabaseClient, declara
 
   return new Map(
     existingRecords
-      .filter((record): record is SourceRecord & { sourceExternalId: string } => !!record.sourceExternalId)
+      .filter(
+        (record): record is SourceRecord & { sourceExternalId: string } =>
+          !!record.sourceExternalId,
+      )
       .map((record) => [record.sourceExternalId, record]),
   );
 }
 
-async function loadExistingPeople(databaseClient: DatabaseClient, declarations: DjiNormalizedDeclaration[]) {
+async function loadExistingPeople(
+  databaseClient: DatabaseClient,
+  declarations: DjiNormalizedDeclaration[],
+) {
   const documentNumbers = [
     ...new Set(
       declarations
@@ -332,7 +348,9 @@ async function loadExistingPeople(databaseClient: DatabaseClient, declarations: 
     ),
   ];
 
-  const normalizedNames = [...new Set(declarations.map((declaration) => declaration.normalizedName))];
+  const normalizedNames = [
+    ...new Set(declarations.map((declaration) => declaration.normalizedName)),
+  ];
 
   const [peopleByDocumentRows, peopleByNameRows] = await Promise.all([
     documentNumbers.length > 0
@@ -363,7 +381,10 @@ async function loadExistingPeople(databaseClient: DatabaseClient, declarations: 
   };
 }
 
-async function loadExistingEntities(databaseClient: DatabaseClient, declarations: DjiNormalizedDeclaration[]) {
+async function loadExistingEntities(
+  databaseClient: DatabaseClient,
+  declarations: DjiNormalizedDeclaration[],
+) {
   const externalIdentifiers = [
     ...new Set(
       declarations.flatMap((declaration) =>
@@ -383,12 +404,18 @@ async function loadExistingEntities(databaseClient: DatabaseClient, declarations
 
   return new Map(
     existingEntities
-      .filter((entity): entity is EntityRecord & { externalIdentifier: string } => !!entity.externalIdentifier)
+      .filter(
+        (entity): entity is EntityRecord & { externalIdentifier: string } =>
+          !!entity.externalIdentifier,
+      )
       .map((entity) => [entity.externalIdentifier, entity]),
   );
 }
 
-async function createPersistenceCache(databaseClient: DatabaseClient, declarations: DjiNormalizedDeclaration[]) {
+async function createPersistenceCache(
+  databaseClient: DatabaseClient,
+  declarations: DjiNormalizedDeclaration[],
+) {
   const [sourceRecordsByExternalId, peopleCache, entitiesByExternalIdentifier] = await Promise.all([
     loadExistingSourceRecords(databaseClient, declarations),
     loadExistingPeople(databaseClient, declarations),
@@ -412,7 +439,9 @@ async function syncSingleDeclaration(
   const declarant = await findOrCreateDeclarant(tx, declaration, cache);
   const observedAt = new Date(`${declaration.observedAt}T00:00:00.000Z`);
   const normalizedPayload = buildNormalizedPayload(declaration, declarant.id);
-  const existingSourceRecord = cache.sourceRecordsByExternalId.get(declaration.declarationExternalId);
+  const existingSourceRecord = cache.sourceRecordsByExternalId.get(
+    declaration.declarationExternalId,
+  );
   const rawPayload = {
     declaration: declaration.rawDeclaration,
     links: declaration.rawLinksByKind,
@@ -463,11 +492,19 @@ async function syncSingleDeclaration(
   }
 
   const existingRelatedPeople = existingSourceRecord
-    ? await loadExistingRelatedPeopleBySourceRecordId(tx, persistedSourceRecord.id, declaration.personLinks)
+    ? await loadExistingRelatedPeopleBySourceRecordId(
+        tx,
+        persistedSourceRecord.id,
+        declaration.personLinks,
+      )
     : new Map<string, PersonRecord>();
 
-  await tx.delete(personEntityLinks).where(eq(personEntityLinks.sourceRecordId, persistedSourceRecord.id));
-  await tx.delete(personPersonLinks).where(eq(personPersonLinks.sourceRecordId, persistedSourceRecord.id));
+  await tx
+    .delete(personEntityLinks)
+    .where(eq(personEntityLinks.sourceRecordId, persistedSourceRecord.id));
+  await tx
+    .delete(personPersonLinks)
+    .where(eq(personPersonLinks.sourceRecordId, persistedSourceRecord.id));
 
   for (const link of declaration.entityLinks) {
     const entity = await findOrCreateEntity(tx, cache, link);
