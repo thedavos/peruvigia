@@ -1,6 +1,8 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
+import { fetchResponse } from "#api/fetch.js";
+
 import {
   compactText,
   normalizeForComparison,
@@ -248,7 +250,7 @@ export function resolveDjiResourcesFromCatalog(entries: DjiCatalogEntry[]) {
 }
 
 async function fetchJson(url: string, fetchImpl: typeof fetch) {
-  const response = await fetchImpl(url);
+  const response = await fetchResponse(url, fetchImpl);
   if (!response.ok) {
     throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
   }
@@ -257,7 +259,7 @@ async function fetchJson(url: string, fetchImpl: typeof fetch) {
 }
 
 async function fetchText(url: string, fetchImpl: typeof fetch) {
-  const response = await fetchImpl(url);
+  const response = await fetchResponse(url, fetchImpl);
   if (!response.ok) {
     throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
   }

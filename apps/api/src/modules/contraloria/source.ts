@@ -1,6 +1,8 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
+import { fetchResponse } from "#api/fetch.js";
+
 import { CONTRALORIA_PUBLICATION_SLUG, CONTRALORIA_REPORTS_LIST_URL } from "./types.js";
 import type { AcquireOptions, ContraloriaFamily, SourceAttachment } from "./types.js";
 
@@ -75,7 +77,7 @@ function extractAttachmentUrls(html: string, reportUrl: string) {
 }
 
 async function fetchText(url: string) {
-  const response = await fetch(url);
+  const response = await fetchResponse(url);
   if (!response.ok) {
     throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
   }
@@ -84,7 +86,7 @@ async function fetchText(url: string) {
 }
 
 async function fetchBuffer(url: string) {
-  const response = await fetch(url);
+  const response = await fetchResponse(url);
   if (!response.ok) {
     throw new Error(`Failed to download ${url}: ${response.status} ${response.statusText}`);
   }
