@@ -24,6 +24,14 @@ type DjiNormalizationResult = {
   skipped: number;
 };
 
+type DjiNonDeclarationDataset = DjiDownloadedDataset & {
+  kind: Exclude<DjiDatasetKind, "declarations">;
+};
+
+type DjiEntityDataset = DjiDownloadedDataset & {
+  kind: Exclude<DjiDatasetKind, "declarations" | "family">;
+};
+
 const DECLARATION_ID_ALIASES = [
   "codigoddjj",
   "codigo_ddjj",
@@ -309,6 +317,16 @@ function normalizeEntityLinkRow(
   };
 }
 
+function isNonDeclarationDataset(
+  dataset: DjiDownloadedDataset,
+): dataset is DjiNonDeclarationDataset {
+  return dataset.kind !== "declarations";
+}
+
+function isEntityDataset(dataset: DjiNonDeclarationDataset): dataset is DjiEntityDataset {
+  return dataset.kind !== "family";
+}
+
 function normalizeFamilyLinkRow(row: Record<string, unknown>) {
   const values = toKeyedRow(row);
   const identity = resolveDeclarationIdentity(values);
@@ -435,13 +453,32 @@ export function normalizeDjiDatasets(datasets: DjiDownloadedDataset[]): DjiNorma
     });
   }
 
-  for (const dataset of datasets.filter((candidate) => candidate.kind !== "declarations")) {
+  for (const dataset of datasets.filter(isNonDeclarationDataset)) {
     for (const row of dataset.rows) {
-      const normalized =
-        dataset.kind === "family"
-          ? normalizeFamilyLinkRow(row)
-          : normalizeEntityLinkRow(dataset.kind, row);
+      if (isEntityDataset(dataset)) {
+        const normalized = normalizeEntityLinkRow(dataset.kind, row);
+        if (!normalized) {
+          skipped += 1;
+          continue;
+        }
 
+        const declaration = declarationsByJoinKey.get(normalized.joinKey);
+        if (!declaration) {
+          skipped += 1;
+          errors.push(
+            `Orphan ${dataset.kind} row without matching declaration: ${normalized.joinKey}`,
+          );
+          continue;
+        }
+
+        const rawRows = declaration.rawLinksByKind[dataset.kind] ?? [];
+        rawRows.push(row);
+        declaration.rawLinksByKind[dataset.kind] = rawRows;
+        declaration.entityLinks.push(normalized.link);
+        continue;
+      }
+
+      const normalized = normalizeFamilyLinkRow(row);
       if (!normalized) {
         skipped += 1;
         continue;
@@ -450,21 +487,14 @@ export function normalizeDjiDatasets(datasets: DjiDownloadedDataset[]): DjiNorma
       const declaration = declarationsByJoinKey.get(normalized.joinKey);
       if (!declaration) {
         skipped += 1;
-        errors.push(
-          `Orphan ${dataset.kind} row without matching declaration: ${normalized.joinKey}`,
-        );
+        errors.push(`Orphan family row without matching declaration: ${normalized.joinKey}`);
         continue;
       }
 
-      const rawRows = declaration.rawLinksByKind[dataset.kind] ?? [];
+      const rawRows = declaration.rawLinksByKind.family ?? [];
       rawRows.push(row);
-      declaration.rawLinksByKind[dataset.kind] = rawRows;
-
-      if (dataset.kind === "family") {
-        declaration.personLinks.push(normalized.link);
-      } else {
-        declaration.entityLinks.push(normalized.link);
-      }
+      declaration.rawLinksByKind.family = rawRows;
+      declaration.personLinks.push(normalized.link);
     }
   }
 
