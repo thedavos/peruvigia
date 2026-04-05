@@ -8,7 +8,7 @@ export const SEACE_REQUIRED_DATASET_KINDS = [
   "contracting_entities",
 ] as const;
 
-export const SEACE_DISTRIBUTION_FORMATS = ["csv", "json", "html", "data"] as const;
+export const SEACE_DISTRIBUTION_FORMATS = ["csv", "json", "html", "data", "xlsx"] as const;
 
 export const SEACE_CATALOG_URLS = [
   "https://www.datosabiertos.gob.pe/data.json",
@@ -19,6 +19,7 @@ export type SeaceDatasetKind = (typeof SEACE_DATASET_KINDS)[number];
 export type SeaceDistributionFormat = (typeof SEACE_DISTRIBUTION_FORMATS)[number];
 
 export type SeaceAcquireOptions = {
+  allowBackfill?: boolean;
   inputDir?: string;
 };
 
@@ -63,6 +64,11 @@ export type SeaceSyncSummary = {
   reused: number;
   skipped: number;
   updated: number;
+};
+
+export type SeaceSyncResult = {
+  errors: string[];
+  summary: SeaceSyncSummary;
 };
 
 export type SeaceNormalizedRnpLink = {

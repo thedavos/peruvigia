@@ -61,6 +61,12 @@ export function parseIsoDate(value: string | null | undefined) {
     return compact;
   }
 
+  const compactNumericMatch = compact.match(/^(\d{4})(\d{2})(\d{2})$/);
+  if (compactNumericMatch) {
+    const [, year, month, day] = compactNumericMatch;
+    return `${year}-${month}-${day}`;
+  }
+
   const slashMatch = compact.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (slashMatch) {
     const [, day, month, year] = slashMatch;

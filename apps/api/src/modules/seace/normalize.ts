@@ -41,6 +41,7 @@ const RNP_PERSON_NAME_ALIASES = [
   "apellidosynombres",
   "nombresyapellidos",
   "nombrecompleto",
+  "nombre_razonodenominacionsocial",
   "persona",
   "integrante",
   "representantelegal",
@@ -62,6 +63,7 @@ const RNP_ROLE_ALIASES = [
   "rol",
   "tipointegrante",
   "tipo_integrante",
+  "tipo_conf_juridica",
   "condicion",
   "calidad",
 ];
@@ -71,8 +73,12 @@ const ENTITY_ID_ALIASES = [
   "id_entidad",
   "codigoentidad",
   "codigo_entidad",
+  "entidad_ruc",
   "codigoue",
   "cod_ue",
+  "codigo_siaf",
+  "codconsucode",
+  "ruc",
 ];
 
 const ENTITY_NAME_ALIASES = [
@@ -107,6 +113,7 @@ const PROCESS_ID_ALIASES = [
   "id_adjudicacion",
   "codigoproceso",
   "codigo_proceso",
+  "proceso",
   "procedimiento",
   "idproceso",
   "id_proceso",
@@ -115,6 +122,7 @@ const PROCESS_ID_ALIASES = [
 const PROCESS_TYPE_ALIASES = [
   "tipoproceso",
   "tipo_proceso",
+  "tipoprocesoseleccion",
   "tipodeprocedimiento",
   "tipo_de_procedimiento",
   "metodocontratacion",
@@ -123,13 +131,17 @@ const PROCESS_TYPE_ALIASES = [
 
 const OBJECT_DESCRIPTION_ALIASES = [
   "objeto",
+  "objetocontractual",
   "descripcionobjeto",
   "descripcion_objeto",
   "descripcion",
+  "descripcion_proceso",
+  "descripcion_item",
   "objeto_contractual",
 ];
 
 const AWARD_DATE_ALIASES = [
+  "fecha_buenapro",
   "fechabuena_pro",
   "fecha_buena_pro",
   "fechaadjudicacion",
@@ -141,6 +153,7 @@ const AWARD_DATE_ALIASES = [
 const AMOUNT_ALIASES = [
   "montoadjudicado",
   "monto_adjudicado",
+  "monto_adjudicado_item_soles",
   "valoradjudicado",
   "valor_adjudicado",
   "monto",
@@ -288,11 +301,12 @@ function normalizeRnpLinkRow(
   row: Record<string, unknown>,
 ): SeaceNormalizedRnpLink | null {
   const values = toKeyedRow(row);
-  const providerName =
-    readRowString(values, RNP_PROVIDER_NAME_ALIASES, ["proveedor", "razon", "social"]) ?? null;
   const providerDocumentNumber = normalizeDocumentNumber(
     readRowString(values, RNP_PROVIDER_DOCUMENT_ALIASES, ["ruc"]),
   );
+  const providerName =
+    readRowString(values, RNP_PROVIDER_NAME_ALIASES) ??
+    (providerDocumentNumber ? `RUC ${providerDocumentNumber}` : null);
   const personFullName =
     readRowString(values, RNP_PERSON_NAME_ALIASES, ["persona", "integrante", "representante"]) ??
     readNameFromComponents(values) ??
@@ -313,7 +327,11 @@ function normalizeRnpLinkRow(
     providerDocumentNumber ?? `provider:${slugify(normalizedProviderName)}`;
   const observedAt =
     parseIsoDate(
-      readRowString(values, ["fechaactualizacion", "fecha_actualizacion"], ["fecha", "vigencia"]),
+      readRowString(
+        values,
+        ["fechacorte", "fecha_corte", "fechaactualizacion", "fecha_actualizacion"],
+        ["fecha", "vigencia"],
+      ),
     ) ??
     parseIsoDate(dataset.modifiedAt) ??
     new Date().toISOString().slice(0, 10);

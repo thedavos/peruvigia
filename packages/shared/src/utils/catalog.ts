@@ -14,6 +14,11 @@ export type OpenDataCatalogEntry = {
   title: string;
 };
 
+export type CsvParseOptions = {
+  delimiter?: string;
+  delimiters?: string[];
+};
+
 export function normalizeCatalogTitle(value: string) {
   return normalizeName(value);
 }
@@ -191,7 +196,34 @@ export function parseJsonRecords(payload: unknown) {
   return [];
 }
 
-export function parseCsvRecords(text: string) {
+function detectCsvDelimiter(text: string, candidates: string[]) {
+  const sampleLine = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .find((line) => line.length > 0);
+
+  if (!sampleLine) {
+    return ",";
+  }
+
+  let bestDelimiter = candidates[0] ?? ",";
+  let bestScore = -1;
+
+  for (const delimiter of candidates) {
+    const score = sampleLine.split(delimiter).length - 1;
+    if (score > bestScore) {
+      bestDelimiter = delimiter;
+      bestScore = score;
+    }
+  }
+
+  return bestDelimiter;
+}
+
+export function parseCsvRecords(text: string, options: CsvParseOptions = {}) {
+  const delimiter =
+    options.delimiter ??
+    detectCsvDelimiter(text, options.delimiters ?? [",", "|", ";", "\t"]);
   const rows: string[][] = [];
   let currentField = "";
   let currentRow: string[] = [];
@@ -211,7 +243,7 @@ export function parseCsvRecords(text: string) {
       continue;
     }
 
-    if (!inQuotes && character === ",") {
+    if (!inQuotes && character === delimiter) {
       currentRow.push(currentField);
       currentField = "";
       continue;

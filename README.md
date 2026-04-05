@@ -24,6 +24,7 @@ vp run test:api
 vp run start:api
 vp run sync:contraloria
 vp run sync:dji
+vp run sync:seace
 vp run db:check
 vp run db:generate
 vp run db:migrate
@@ -59,6 +60,28 @@ archivos `declarations.*`, `employment.*`, `commercial.*`, `family.*`, `guild.*`
 `declarations.*` es obligatorio. Los demas son opcionales y se importan solo si la fuente oficial
 o tu carpeta offline realmente los tiene disponibles. Esto permite correr el ETL con la oferta
 actual verificada del portal, donde hoy estan claros `declarations`, `employment` y `family`.
+
+Sincronizacion de SEACE/OSCE:
+
+```bash
+vp run sync:seace
+vp run sync:seace --input-dir ./tmp/seace
+vp run sync:seace --allow-backfill
+vp run sync:seace --input-dir ./tmp/seace --allow-backfill
+```
+
+El importador de SEACE resuelve el subset MVP definido para:
+
+- `rnp_people`
+- `awards`
+- `contracting_entities`
+
+Para fixtures offline, `--input-dir` debe contener los archivos `rnp_people.*`, `awards.*` y
+`contracting_entities.*`. El ETL soporta `csv`, `json` y `html` segun el dataset.
+
+Por defecto, el importador rechaza evidencia mas antigua que la ultima fecha ya importada en
+`source_records`. Usa `--allow-backfill` solo cuando quieras cargar historico de forma
+intencional.
 
 El proyecto declara `vite-plus` localmente, asi que todo el tooling del repositorio puede entrar
 por `vp` sin requerir una instalacion global adicional.
@@ -106,6 +129,7 @@ Comandos sugeridos:
 - prueba PostgreSQL: `vp run db:check`
 - sincronizar Contraloría: `vp run sync:contraloria`
 - sincronizar DJI: `vp run sync:dji`
+- sincronizar SEACE: `vp run sync:seace`
 - generar migraciones: `vp run db:generate`
 - aplicar migraciones: `vp run db:migrate`
 
