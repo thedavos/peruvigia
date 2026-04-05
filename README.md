@@ -89,27 +89,6 @@ Valores practicos en Coolify:
 - `WEB_URL`: `https://web.tudominio.com`
 - `API_URL`: `https://api.tudominio.com`
 
-## Vercel
-
-Despliegue recomendado en Vercel:
-
-- proyecto `peruvigia-web` con Root Directory `apps/web`
-- proyecto `peruvigia-api` con Root Directory `apps/api`
-- Node.js 22 en ambos proyectos
-- habilitar soporte de monorepo cuando Vercel lo pida, porque `apps/*` consume codigo desde `packages/*`
-
-Variables minimas por proyecto:
-
-- `web`: `API_URL`
-- `api`: `DATABASE_URL`, `WEB_URL`, `OLLAMA_BASE_URL`
-
-Notas operativas:
-
-- `PORT` es solo para desarrollo local; no hace falta configurarlo en Vercel
-- la API se despliega como Fastify sobre Vercel Functions
-- los jobs `sync:*`, `db:generate`, `db:migrate` y `db:check` siguen ejecutandose fuera de Vercel
-- el bootstrap inicial de ambos proyectos es mas simple desde el dashboard, y luego puedes inspeccionar deployments y logs con el plugin de Vercel en Codex
-
 ## Coolify
 
 Servicios sugeridos para `VIG-5`:
@@ -134,6 +113,12 @@ Variables minimas por servicio:
 
 - `web`: `API_URL`
 - `api`: `PORT`, `DATABASE_URL`, `WEB_URL`, `OLLAMA_BASE_URL`
+
+Notas operativas:
+
+- el monorepo usa `workspace:*`, asi que `packages/shared` se resuelve de forma natural en Coolify sin publicar paquetes
+- para la API, conviene construir primero `@peruvigia/shared` y luego `@peruvigia/api`
+- los jobs `sync:*`, `db:generate`, `db:migrate` y `db:check` pueden seguir corriendo manualmente desde el mismo entorno o desde tu maquina local
 
 ## Base de datos
 
