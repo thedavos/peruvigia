@@ -5,9 +5,11 @@ import { fetchResponse } from "#api/fetch.js";
 
 import {
   compactText,
-  normalizeForComparison,
-  normalizeKey,
-  normalizeWhitespace,
+  normalizeCatalogTitle,
+  normalizeOpenDataCatalogEntries,
+  parseCsvRecords,
+  parseJsonRecords,
+  selectPreferredOpenDataResource,
 } from "@peruvigia/shared";
 
 import {
@@ -16,7 +18,6 @@ import {
   DJI_REQUIRED_DATASET_KINDS,
   type DjiAcquireOptions,
   type DjiCatalogEntry,
-  type DjiCatalogResource,
   type DjiDatasetKind,
   type DjiDistributionFormat,
   type DjiDownloadedDataset,
@@ -34,37 +35,8 @@ const DATASET_KIND_KEYWORDS: Record<DjiDatasetKind, string[]> = {
 
 const DISTRIBUTION_PRIORITY: DjiDistributionFormat[] = ["json", "csv", "xml"];
 
-function normalizeDatasetTitle(value: string) {
-  return normalizeForComparison(value)
-    .replace(/[^a-z0-9 ]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function inferDistributionFormat(resource: Pick<DjiCatalogResource, "format" | "url">) {
-  const normalizedFormat = normalizeKey(resource.format ?? "");
-  if (normalizedFormat === "json" || normalizedFormat === "csv" || normalizedFormat === "xml") {
-    return normalizedFormat;
-  }
-
-  const url = resource.url?.toLowerCase() ?? "";
-  if (url.endsWith(".json")) {
-    return "json";
-  }
-
-  if (url.endsWith(".csv")) {
-    return "csv";
-  }
-
-  if (url.endsWith(".xml")) {
-    return "xml";
-  }
-
-  return null;
-}
-
 function inferDatasetKind(title: string) {
-  const normalizedTitle = normalizeDatasetTitle(title);
+  const normalizedTitle = normalizeCatalogTitle(title);
 
   if (
     DATASET_KIND_KEYWORDS.family.some((keyword) => normalizedTitle.includes(keyword)) &&
@@ -103,125 +75,6 @@ function inferDatasetKind(title: string) {
   return null;
 }
 
-function normalizeCatalogEntries(payload: unknown): DjiCatalogEntry[] {
-  if (!payload || typeof payload !== "object") {
-    return [];
-  }
-
-  if ("dataset" in payload && Array.isArray((payload as { dataset?: unknown[] }).dataset)) {
-    return ((payload as { dataset: unknown[] }).dataset ?? [])
-      .map((entry) => {
-        if (!entry || typeof entry !== "object") {
-          return null;
-        }
-
-        const distribution = Array.isArray((entry as { distribution?: unknown[] }).distribution)
-          ? ((entry as { distribution: unknown[] }).distribution ?? [])
-          : [];
-
-        return {
-          id: compactText(String((entry as { identifier?: unknown }).identifier ?? "")),
-          modifiedAt: compactText(String((entry as { modified?: unknown }).modified ?? "")),
-          resources: distribution
-            .map((resource) => {
-              if (!resource || typeof resource !== "object") {
-                return null;
-              }
-
-              return {
-                format: compactText(String((resource as { format?: unknown }).format ?? "")),
-                title: compactText(String((resource as { title?: unknown }).title ?? "")),
-                url: compactText(
-                  String(
-                    (resource as { accessURL?: unknown; downloadURL?: unknown }).downloadURL ??
-                      (resource as { accessURL?: unknown }).accessURL ??
-                      "",
-                  ),
-                ),
-              } satisfies DjiCatalogResource;
-            })
-            .filter((resource): resource is DjiCatalogResource => resource != null),
-          title: compactText(String((entry as { title?: unknown }).title ?? "")) ?? "untitled",
-        } satisfies DjiCatalogEntry;
-      })
-      .filter((entry): entry is DjiCatalogEntry => entry != null);
-  }
-
-  const results = ((payload as { result?: { results?: unknown[] } }).result?.results ??
-    []) as unknown[];
-  if (!Array.isArray(results)) {
-    return [];
-  }
-
-  return results
-    .map((entry) => {
-      if (!entry || typeof entry !== "object") {
-        return null;
-      }
-
-      const resources = Array.isArray((entry as { resources?: unknown[] }).resources)
-        ? ((entry as { resources: unknown[] }).resources ?? [])
-        : [];
-
-      return {
-        id:
-          compactText(String((entry as { id?: unknown; name?: unknown }).id ?? "")) ??
-          compactText(String((entry as { name?: unknown }).name ?? "")),
-        modifiedAt: compactText(
-          String((entry as { metadata_modified?: unknown }).metadata_modified ?? ""),
-        ),
-        resources: resources
-          .map((resource) => {
-            if (!resource || typeof resource !== "object") {
-              return null;
-            }
-
-            return {
-              format: compactText(String((resource as { format?: unknown }).format ?? "")),
-              title: compactText(String((resource as { name?: unknown }).name ?? "")),
-              url: compactText(String((resource as { url?: unknown }).url ?? "")),
-            } satisfies DjiCatalogResource;
-          })
-          .filter((resource): resource is DjiCatalogResource => resource != null),
-        title: compactText(String((entry as { title?: unknown }).title ?? "")) ?? "untitled",
-      } satisfies DjiCatalogEntry;
-    })
-    .filter((entry): entry is DjiCatalogEntry => entry != null);
-}
-
-function selectPreferredResource(
-  resources: DjiCatalogResource[],
-  title: string,
-): Pick<DjiResolvedResource, "format" | "sourceUrl"> | null {
-  for (const format of DISTRIBUTION_PRIORITY) {
-    const match = resources.find(
-      (resource) => inferDistributionFormat(resource) === format && resource.url,
-    );
-
-    if (match?.url) {
-      return {
-        format,
-        sourceUrl: match.url,
-      };
-    }
-  }
-
-  const inlineMatch = resources.find((resource) => resource.url);
-  if (!inlineMatch?.url) {
-    return null;
-  }
-
-  const inferredFormat = inferDistributionFormat(inlineMatch);
-  if (!inferredFormat) {
-    throw new Error(`Unsupported DJI resource format for ${title}.`);
-  }
-
-  return {
-    format: inferredFormat,
-    sourceUrl: inlineMatch.url,
-  };
-}
-
 export function resolveDjiResourcesFromCatalog(entries: DjiCatalogEntry[]) {
   const resolvedResources = new Map<DjiDatasetKind, DjiResolvedResource>();
 
@@ -231,7 +84,11 @@ export function resolveDjiResourcesFromCatalog(entries: DjiCatalogEntry[]) {
       continue;
     }
 
-    const resource = selectPreferredResource(entry.resources, entry.title);
+    const resource = selectPreferredOpenDataResource(
+      entry.resources,
+      DISTRIBUTION_PRIORITY,
+      entry.title,
+    );
     if (!resource) {
       continue;
     }
@@ -273,9 +130,9 @@ async function fetchCatalogEntries(fetchImpl: typeof fetch) {
   for (const catalogUrl of DJI_CATALOG_URLS) {
     try {
       const payload = await fetchJson(catalogUrl, fetchImpl);
-      const entries = normalizeCatalogEntries(payload);
+      const entries = normalizeOpenDataCatalogEntries(payload);
       if (entries.length > 0) {
-        return entries;
+        return entries as DjiCatalogEntry[];
       }
     } catch (error) {
       errors.push(error instanceof Error ? error.message : String(error));
@@ -283,100 +140,6 @@ async function fetchCatalogEntries(fetchImpl: typeof fetch) {
   }
 
   throw new Error(`Could not resolve DJI catalog metadata. ${errors.join(" | ")}`.trim());
-}
-
-function parseJsonRows(payload: unknown) {
-  if (Array.isArray(payload)) {
-    return payload.filter(
-      (row): row is Record<string, unknown> => !!row && typeof row === "object",
-    );
-  }
-
-  if (!payload || typeof payload !== "object") {
-    return [];
-  }
-
-  const candidates = [
-    (payload as { records?: unknown }).records,
-    (payload as { data?: unknown }).data,
-    (payload as { result?: { records?: unknown } }).result?.records,
-    (payload as { result?: unknown[] }).result,
-  ];
-
-  for (const candidate of candidates) {
-    if (Array.isArray(candidate)) {
-      return candidate.filter(
-        (row): row is Record<string, unknown> => !!row && typeof row === "object",
-      );
-    }
-  }
-
-  return [];
-}
-
-function parseCsvRows(text: string) {
-  const rows: string[][] = [];
-  let currentField = "";
-  let currentRow: string[] = [];
-  let inQuotes = false;
-
-  for (let index = 0; index < text.length; index += 1) {
-    const character = text[index] ?? "";
-    const nextCharacter = text[index + 1] ?? "";
-
-    if (character === '"') {
-      if (inQuotes && nextCharacter === '"') {
-        currentField += '"';
-        index += 1;
-      } else {
-        inQuotes = !inQuotes;
-      }
-      continue;
-    }
-
-    if (!inQuotes && character === ",") {
-      currentRow.push(currentField);
-      currentField = "";
-      continue;
-    }
-
-    if (!inQuotes && (character === "\n" || character === "\r")) {
-      if (character === "\r" && nextCharacter === "\n") {
-        index += 1;
-      }
-
-      currentRow.push(currentField);
-      currentField = "";
-
-      if (currentRow.some((field) => field.length > 0)) {
-        rows.push(currentRow);
-      }
-
-      currentRow = [];
-      continue;
-    }
-
-    currentField += character;
-  }
-
-  currentRow.push(currentField);
-  if (currentRow.some((field) => field.length > 0)) {
-    rows.push(currentRow);
-  }
-
-  const [headerRow, ...dataRows] = rows;
-  if (!headerRow) {
-    return [];
-  }
-
-  const headers = headerRow.map((column) => normalizeWhitespace(column));
-  return dataRows
-    .map((row) =>
-      Object.fromEntries(headers.map((header, index) => [header, compactText(row[index] ?? "")])),
-    )
-    .filter((row) => Object.values(row).some((value) => value != null)) as Array<
-    Record<string, unknown>
-  >;
 }
 
 function parseXmlScalar(value: string) {
@@ -413,11 +176,11 @@ function parseXmlRows(text: string) {
 
 function parseDatasetBody(format: DjiDistributionFormat, body: string) {
   if (format === "json") {
-    return parseJsonRows(JSON.parse(body));
+    return parseJsonRecords(JSON.parse(body));
   }
 
   if (format === "csv") {
-    return parseCsvRows(body);
+    return parseCsvRecords(body);
   }
 
   return parseXmlRows(body);
@@ -497,4 +260,4 @@ export async function acquireDjiDatasets(
   );
 }
 
-export { inferDatasetKind, normalizeCatalogEntries, parseCsvRows, parseXmlRows };
+export { inferDatasetKind, parseXmlRows };

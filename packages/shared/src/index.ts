@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export * from "./utils/date.js";
+export * from "./utils/catalog.js";
 export * from "./utils/identity.js";
 export * from "./utils/normalization.js";
 export * from "./utils/object.js";
