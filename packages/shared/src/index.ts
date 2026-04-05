@@ -5,6 +5,7 @@ export * from "./utils/catalog.js";
 export * from "./utils/identity.js";
 export * from "./utils/normalization.js";
 export * from "./utils/object.js";
+export * from "./utils/rows.js";
 export * from "./utils/text.js";
 
 export const HealthResponseSchema = z.object({

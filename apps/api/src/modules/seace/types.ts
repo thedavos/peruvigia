@@ -54,3 +54,70 @@ export type SeaceDownloadedDataset = {
   sourceUrl: string;
   title: string;
 };
+
+export type SeaceSyncSummary = {
+  downloaded: number;
+  failed: number;
+  inserted: number;
+  processed: number;
+  reused: number;
+  skipped: number;
+  updated: number;
+};
+
+export type SeaceNormalizedRnpLink = {
+  normalizedPersonName: string;
+  normalizedProviderName: string;
+  observedAt: string;
+  personDocumentNumber: string | null;
+  personDocumentType: string | null;
+  personFullName: string;
+  providerDocumentNumber: string | null;
+  providerExternalId: string;
+  providerName: string;
+  rawPayload: Record<string, unknown>;
+  relationshipType: string;
+  sourceExternalId: string;
+  sourceUrl: string | null;
+};
+
+export type SeaceNormalizedAward = {
+  awardedAt: string | null;
+  contractingEntityExternalId: string;
+  contractingEntityName: string;
+  currency: string | null;
+  normalizedContractingEntityName: string;
+  normalizedSupplierName: string;
+  objectDescription: string | null;
+  processExternalId: string;
+  processType: string | null;
+  rawPayload: Record<string, unknown>;
+  sourceExternalId: string;
+  sourceUrl: string | null;
+  status: string | null;
+  supplierDocumentNumber: string | null;
+  supplierExternalId: string;
+  supplierName: string;
+  totalAmount: number | null;
+};
+
+export type SeaceNormalizedContractingEntity = {
+  acronym: string | null;
+  entityExternalId: string;
+  entityName: string;
+  governmentLevel: string | null;
+  normalizedEntityName: string;
+  rawPayload: Record<string, unknown>;
+  sector: string | null;
+  sourceExternalId: string;
+  sourceUrl: string | null;
+  status: string | null;
+};
+
+export type SeaceNormalizationResult = {
+  awards: SeaceNormalizedAward[];
+  contractingEntities: SeaceNormalizedContractingEntity[];
+  errors: string[];
+  rnpLinks: SeaceNormalizedRnpLink[];
+  skipped: number;
+};
