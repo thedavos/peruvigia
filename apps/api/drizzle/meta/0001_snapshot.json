@@ -310,12 +310,8 @@
           "name": "person_entity_links_person_id_people_id_fk",
           "tableFrom": "person_entity_links",
           "tableTo": "people",
-          "columnsFrom": [
-            "person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["person_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -323,12 +319,8 @@
           "name": "person_entity_links_entity_id_entities_id_fk",
           "tableFrom": "person_entity_links",
           "tableTo": "entities",
-          "columnsFrom": [
-            "entity_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["entity_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -336,12 +328,8 @@
           "name": "person_entity_links_source_record_id_source_records_id_fk",
           "tableFrom": "person_entity_links",
           "tableTo": "source_records",
-          "columnsFrom": [
-            "source_record_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["source_record_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -459,12 +447,8 @@
           "name": "person_person_links_person_id_people_id_fk",
           "tableFrom": "person_person_links",
           "tableTo": "people",
-          "columnsFrom": [
-            "person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["person_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -472,12 +456,8 @@
           "name": "person_person_links_related_person_id_people_id_fk",
           "tableFrom": "person_person_links",
           "tableTo": "people",
-          "columnsFrom": [
-            "related_person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["related_person_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -485,12 +465,8 @@
           "name": "person_person_links_source_record_id_source_records_id_fk",
           "tableFrom": "person_person_links",
           "tableTo": "source_records",
-          "columnsFrom": [
-            "source_record_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["source_record_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -593,12 +569,8 @@
           "name": "score_snapshots_person_id_people_id_fk",
           "tableFrom": "score_snapshots",
           "tableTo": "people",
-          "columnsFrom": [
-            "person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["person_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -716,12 +688,8 @@
           "name": "search_aliases_person_id_people_id_fk",
           "tableFrom": "search_aliases",
           "tableTo": "people",
-          "columnsFrom": [
-            "person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["person_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -729,12 +697,8 @@
           "name": "search_aliases_source_record_id_source_records_id_fk",
           "tableFrom": "search_aliases",
           "tableTo": "source_records",
-          "columnsFrom": [
-            "source_record_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["source_record_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -866,12 +830,8 @@
           "name": "signals_person_id_people_id_fk",
           "tableFrom": "signals",
           "tableTo": "people",
-          "columnsFrom": [
-            "person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["person_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -879,12 +839,8 @@
           "name": "signals_source_record_id_source_records_id_fk",
           "tableFrom": "signals",
           "tableTo": "source_records",
-          "columnsFrom": [
-            "source_record_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["source_record_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -1021,12 +977,8 @@
           "name": "source_records_person_id_people_id_fk",
           "tableFrom": "source_records",
           "tableTo": "people",
-          "columnsFrom": [
-            "person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["person_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
