@@ -1,5 +1,5 @@
-import { pool } from "#api/db/index.js";
-import { runDjiSync } from "#api/modules/dji/service.js";
+import { pool } from "#api/db";
+import { runDjiSync } from "#api/modules/dji/service";
 
 type CliOptions = {
   allowBackfill?: boolean;

@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import ExcelJS from "exceljs";
 
-import { acquireSeaceDatasets, resolveSeaceResourcesFromCatalog } from "./source.js";
+import { acquireSeaceDatasets, resolveSeaceResourcesFromCatalog } from "./source";
 
 test("resolveSeaceResourcesFromCatalog picks the right resource for each MVP dataset", () => {
   const resources = resolveSeaceResourcesFromCatalog([

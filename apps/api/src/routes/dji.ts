@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 
 import { DjiContextResponseSchema, DjiLinkTypeValues } from "@peruvigia/shared";
 
-import { getDjiContext } from "#api/modules/dji/service.js";
+import { getDjiContext } from "#api/modules/dji/service";
 
 const djiEvidenceJsonSchema = {
   additionalProperties: false,

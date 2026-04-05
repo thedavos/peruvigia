@@ -1,5 +1,5 @@
-import { pool } from "#api/db/index.js";
-import { runSeaceSync } from "#api/modules/seace/service.js";
+import { pool } from "#api/db";
+import { runSeaceSync } from "#api/modules/seace/service";
 
 type CliOptions = {
   allowBackfill?: boolean;

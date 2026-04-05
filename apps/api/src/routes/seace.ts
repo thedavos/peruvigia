@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 
-import { getSeaceActivity } from "#api/modules/seace/service.js";
+import { getSeaceActivity } from "#api/modules/seace/service";
 
 const seaceActivityRecordJsonSchema = {
   additionalProperties: false,

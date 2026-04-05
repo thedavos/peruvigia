@@ -1,4 +1,4 @@
-import { classifySanction } from "./classification.js";
+import { classifySanction } from "./classification";
 
 test("classifySanction prioritizes explicit status over dates", () => {
   const result = classifySanction({

@@ -1,4 +1,4 @@
-import type { ContraloriaFamily, RowClassification } from "./types.js";
+import type { ContraloriaFamily, RowClassification } from "./types";
 import { normalizeForComparison } from "@peruvigia/shared";
 
 type ClassifyInput = {

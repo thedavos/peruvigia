@@ -19,7 +19,7 @@ import type {
   SeaceNormalizedContractingEntity,
   SeaceNormalizedRnpLink,
   SeaceNormalizationResult,
-} from "./types.js";
+} from "./types";
 
 const RNP_PROVIDER_NAME_ALIASES = [
   "razonsocial",

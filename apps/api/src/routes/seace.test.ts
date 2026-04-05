@@ -1,4 +1,4 @@
-import { buildApp } from "#api/app.js";
+import { buildApp } from "#api/app";
 
 test("GET /seace/activity returns the simplified contractual activity view", async () => {
   const app = await buildApp({
@@ -65,7 +65,7 @@ test("GET /seace/activity returns the simplified contractual activity view", asy
 });
 
 test("GET /seace/activity forwards query filters to the service", async () => {
-  const calls: Array<Record<string, unknown>> = [];
+  const calls: Array<Record<string, unknown> | undefined> = [];
   const app = await buildApp({
     services: {
       getSeaceActivity: async (filters) => {

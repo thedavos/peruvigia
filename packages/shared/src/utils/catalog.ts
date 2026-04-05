@@ -1,5 +1,5 @@
-import { normalizeName, normalizeKey } from "./normalization.js";
-import { compactText, normalizeWhitespace } from "./text.js";
+import { normalizeName, normalizeKey } from "./normalization";
+import { compactText, normalizeWhitespace } from "./text";
 
 export type OpenDataCatalogResource = {
   format: string | null;
@@ -222,8 +222,7 @@ function detectCsvDelimiter(text: string, candidates: string[]) {
 
 export function parseCsvRecords(text: string, options: CsvParseOptions = {}) {
   const delimiter =
-    options.delimiter ??
-    detectCsvDelimiter(text, options.delimiters ?? [",", "|", ";", "\t"]);
+    options.delimiter ?? detectCsvDelimiter(text, options.delimiters ?? [",", "|", ";", "\t"]);
   const rows: string[][] = [];
   let currentField = "";
   let currentRow: string[] = [];

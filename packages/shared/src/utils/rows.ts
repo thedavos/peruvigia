@@ -1,5 +1,5 @@
-import { compactText, normalizeWhitespace } from "./text.js";
-import { normalizeKey } from "./normalization.js";
+import { compactText, normalizeWhitespace } from "./text";
+import { normalizeKey } from "./normalization";
 
 export type KeyedRow = Map<string, unknown>;
 

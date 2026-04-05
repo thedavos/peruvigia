@@ -1,5 +1,5 @@
-import { normalizeDjiDatasets } from "./normalize.js";
-import type { DjiDownloadedDataset } from "./types.js";
+import { normalizeDjiDatasets } from "./normalize";
+import type { DjiDownloadedDataset } from "./types";
 
 function createDataset(
   kind: DjiDownloadedDataset["kind"],

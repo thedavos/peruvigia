@@ -1,10 +1,10 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
-import { fetchResponse } from "#api/fetch.js";
+import { fetchResponse } from "#api/fetch";
 
-import { CONTRALORIA_PUBLICATION_SLUG, CONTRALORIA_REPORTS_LIST_URL } from "./types.js";
-import type { AcquireOptions, ContraloriaFamily, SourceAttachment } from "./types.js";
+import { CONTRALORIA_PUBLICATION_SLUG, CONTRALORIA_REPORTS_LIST_URL } from "./types";
+import type { AcquireOptions, ContraloriaFamily, SourceAttachment } from "./types";
 
 function toAbsoluteUrl(candidate: string, baseUrl: string) {
   return new URL(candidate, baseUrl).toString();

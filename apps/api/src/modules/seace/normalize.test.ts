@@ -1,5 +1,5 @@
-import { normalizeSeaceDatasets } from "./normalize.js";
-import type { SeaceDownloadedDataset } from "./types.js";
+import { normalizeSeaceDatasets } from "./normalize";
+import type { SeaceDownloadedDataset } from "./types";
 
 function createDataset(
   kind: SeaceDownloadedDataset["kind"],

@@ -1,4 +1,4 @@
-import { isSameDjiSourceRecord, buildRelatedPersonReuseKey } from "./repository.js";
+import { isSameDjiSourceRecord, buildRelatedPersonReuseKey } from "./repository";
 
 test("buildRelatedPersonReuseKey is stable for equivalent family links", () => {
   const left = buildRelatedPersonReuseKey({

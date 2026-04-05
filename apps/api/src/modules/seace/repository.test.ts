@@ -1,4 +1,4 @@
-import { isSameSeaceSourceRecord } from "./repository.js";
+import { isSameSeaceSourceRecord } from "./repository";
 
 test("isSameSeaceSourceRecord compares payloads and evidence identity", () => {
   const observedAt = new Date("2026-04-05T00:00:00.000Z");

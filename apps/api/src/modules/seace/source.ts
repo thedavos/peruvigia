@@ -12,7 +12,7 @@ import {
   selectPreferredOpenDataResource,
 } from "@peruvigia/shared";
 
-import { fetchResponse } from "#api/fetch.js";
+import { fetchResponse } from "#api/fetch";
 import {
   SEACE_CATALOG_URLS,
   SEACE_DATASET_KINDS,
@@ -23,7 +23,7 @@ import {
   type SeaceDistributionFormat,
   type SeaceDownloadedDataset,
   type SeaceResolvedResource,
-} from "./types.js";
+} from "./types";
 
 const DATASET_KIND_KEYWORDS: Record<SeaceDatasetKind, string[]> = {
   awards: ["datos de la adjudicacion", "adjudicacion", "buena pro"],
@@ -289,7 +289,9 @@ function rowsFromWorksheet(worksheet: ExcelJS.Worksheet) {
 
 async function parseWorkbookRecords(workbookData: Buffer): Promise<WorkbookRecord[]> {
   const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(workbookData);
+  const workbookBuffer = Buffer.from(workbookData);
+  const workbookInput = workbookBuffer as unknown as Parameters<typeof workbook.xlsx.load>[0];
+  await workbook.xlsx.load(workbookInput);
 
   const records: WorkbookRecord[] = [];
 

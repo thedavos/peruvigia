@@ -6,6 +6,7 @@ import {
   readRowString,
   slugify,
   toKeyedRow,
+  type KeyedRow,
 } from "@peruvigia/shared";
 import { hashNormalizedPayload } from "@peruvigia/shared/node";
 
@@ -15,7 +16,7 @@ import type {
   DjiNormalizedDeclaration,
   DjiNormalizedEntityLink,
   DjiNormalizedPersonLink,
-} from "./types.js";
+} from "./types";
 
 type DjiNormalizationResult = {
   declarations: DjiNormalizedDeclaration[];

@@ -1,4 +1,4 @@
-import { normalizeForComparison } from "./text.js";
+import { normalizeForComparison } from "./text";
 
 export function normalizeName(value: string) {
   return normalizeForComparison(value)

@@ -9,13 +9,13 @@ import {
 } from "@peruvigia/shared";
 import { hashNormalizedPayload } from "@peruvigia/shared/node";
 
-import { classifySanction } from "./classification.js";
+import { classifySanction } from "./classification";
 import type {
   ContraloriaFamily,
   NormalizedSanctionRecord,
   ParsedWorkbookRow,
   SourceAttachment,
-} from "./types.js";
+} from "./types";
 
 const HEADER_ALIASES = {
   documentNumber: [

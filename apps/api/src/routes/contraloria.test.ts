@@ -1,4 +1,4 @@
-import { buildApp } from "#api/app.js";
+import { buildApp } from "#api/app";
 
 test("GET /people/:personId/contraloria-status returns grouped signals", async () => {
   const app = await buildApp({

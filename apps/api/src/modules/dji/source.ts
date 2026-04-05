@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
-import { fetchResponse } from "#api/fetch.js";
+import { fetchResponse } from "#api/fetch";
 
 import {
   compactText,
@@ -22,7 +22,7 @@ import {
   type DjiDistributionFormat,
   type DjiDownloadedDataset,
   type DjiResolvedResource,
-} from "./types.js";
+} from "./types";
 
 const DATASET_KIND_KEYWORDS: Record<DjiDatasetKind, string[]> = {
   declarations: ["declaraciones", "declarantes", "declaracion jurada"],

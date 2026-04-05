@@ -2,7 +2,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import { acquireDjiDatasets, resolveDjiResourcesFromCatalog } from "./source.js";
+import { acquireDjiDatasets, resolveDjiResourcesFromCatalog } from "./source";
 
 test("resolveDjiResourcesFromCatalog picks the preferred format per dataset kind", () => {
   const resources = resolveDjiResourcesFromCatalog([

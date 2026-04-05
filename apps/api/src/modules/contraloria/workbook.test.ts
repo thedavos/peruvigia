@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
 
-import { normalizeParsedRow, parseAttachmentRows } from "./workbook.js";
-import type { SourceAttachment } from "./types.js";
+import { normalizeParsedRow, parseAttachmentRows } from "./workbook";
+import type { SourceAttachment } from "./types";
 
 async function createAttachment(
   fileName: string,
