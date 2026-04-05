@@ -15,7 +15,8 @@
     "db:migrate": "vp run --filter @peruvigia/api db:migrate",
     "db:studio": "vp run --filter @peruvigia/api db:studio",
     "sync:contraloria": "vp run --filter @peruvigia/api sync:contraloria",
-    "sync:dji": "vp run --filter @peruvigia/api sync:dji"
+    "sync:dji": "vp run --filter @peruvigia/api sync:dji",
+    "sync:seace": "vp run --filter @peruvigia/api sync:seace"
   },
   "devDependencies": {
     "@types/node": "^24.6.0",

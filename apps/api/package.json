@@ -17,7 +17,8 @@
     "db:migrate": "vp exec tsx src/scripts/migrate-db.ts",
     "db:studio": "vp exec drizzle-kit studio --config=drizzle.config.ts",
     "sync:contraloria": "vp exec tsx src/scripts/sync-contraloria.ts",
-    "sync:dji": "vp exec tsx src/scripts/sync-dji.ts"
+    "sync:dji": "vp exec tsx src/scripts/sync-dji.ts",
+    "sync:seace": "vp exec tsx src/scripts/sync-seace.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",
