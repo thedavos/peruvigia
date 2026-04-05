@@ -2,20 +2,20 @@ import { and, eq, inArray, type InferSelectModel } from "drizzle-orm";
 
 import { stableStringify } from "@peruvigia/shared";
 
-import { db } from "#api/db/index.js";
+import { db } from "#api/db";
 import {
   entities,
   people,
   personEntityLinks,
   personPersonLinks,
   sourceRecords,
-} from "#api/db/schema.js";
+} from "#api/db/schema.ts";
 import {
   DJI_SOURCE_TYPE,
   type DjiNormalizedDeclaration,
   type DjiSyncResult,
   type DjiSyncSummary,
-} from "./types.js";
+} from "./types.ts";
 
 type DatabaseClient = typeof db;
 type TransactionClient = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -457,7 +457,7 @@ async function syncSingleDeclaration(
     })
   ) {
     summary.reused += 1;
-    return;
+    return declarant;
   }
 
   const sourceRecordValues = {
@@ -541,6 +541,8 @@ async function syncSingleDeclaration(
       startDate: link.startDate ?? undefined,
     });
   }
+
+  return declarant;
 }
 
 function chunkDeclarations<T>(declarations: T[], size: number) {
@@ -559,12 +561,14 @@ async function persistDeclarationBatch(
   cache: DjiPersistenceCache,
   summary: DjiSyncSummary,
   errors: string[],
+  affectedPersonIds: Set<string>,
 ) {
   await databaseClient.transaction(async (batchTx) => {
     for (const declaration of batch) {
       try {
         await batchTx.transaction(async (declarationTx) => {
-          await syncSingleDeclaration(declarationTx, declaration, cache, summary);
+          const declarant = await syncSingleDeclaration(declarationTx, declaration, cache, summary);
+          affectedPersonIds.add(declarant.id);
         });
       } catch (error) {
         summary.failed += 1;
@@ -590,6 +594,7 @@ export async function persistDjiDeclarations(
     ...emptySummary(),
     ...options?.initialSummary,
   };
+  const affectedPersonIds = new Set<string>();
   const errors: string[] = [];
   const uniqueDeclarations: DjiNormalizedDeclaration[] = [];
   const seenExternalIds = new Set<string>();
@@ -610,10 +615,11 @@ export async function persistDjiDeclarations(
   const batches = chunkDeclarations(uniqueDeclarations, DJI_BATCH_SIZE);
 
   for (const batch of batches) {
-    await persistDeclarationBatch(databaseClient, batch, cache, summary, errors);
+    await persistDeclarationBatch(databaseClient, batch, cache, summary, errors, affectedPersonIds);
   }
 
   return {
+    affectedPersonIds: [...affectedPersonIds].sort((left, right) => left.localeCompare(right)),
     errors,
     summary,
   };

@@ -2,18 +2,18 @@ import { and, desc, eq, max, sql } from "drizzle-orm";
 
 import { formatIsoDate, readRecordString } from "@peruvigia/shared";
 
-import { db } from "#api/db/index.js";
-import { sourceRecords } from "#api/db/schema.js";
-import { normalizeSeaceDatasets } from "./normalize.js";
-import { persistSeaceRecords } from "./repository.js";
-import { acquireSeaceDatasets } from "./source.js";
+import { db } from "#api/db/index.ts";
+import { sourceRecords } from "#api/db/schema.ts";
+import { normalizeSeaceDatasets } from "./normalize.ts";
+import { persistSeaceRecords } from "./repository.ts";
+import { acquireSeaceDatasets } from "./source.ts";
 import {
   SEACE_SOURCE_TYPE,
   type SeaceAcquireOptions,
   type SeaceActivityFilters,
   type SeaceActivityRecord,
   type SeaceSyncResult,
-} from "./types.js";
+} from "./types.ts";
 
 type DatabaseClient = typeof db;
 
@@ -22,6 +22,10 @@ type SeaceServiceDependencies = {
   getLatestImportedObservedAt?: (databaseClient: DatabaseClient) => Promise<string | null>;
   normalizeDatasets?: typeof normalizeSeaceDatasets;
   persistRecords?: typeof persistSeaceRecords;
+  recalculateAttentionProfiles?: (
+    personIds: string[],
+    databaseClient: DatabaseClient,
+  ) => Promise<string[]>;
 };
 
 async function getLatestImportedObservedAt(databaseClient: DatabaseClient) {
@@ -111,8 +115,9 @@ function getIncomingObservedAt(
     return null;
   }
 
-  return candidates.reduce<string>((latestDate, candidate) =>
-    candidate > latestDate ? candidate : latestDate,
+  return candidates.reduce<string>(
+    (latestDate, candidate) => (candidate > latestDate ? candidate : latestDate),
+    candidates[0]!,
   );
 }
 
@@ -126,6 +131,12 @@ export async function runSeaceSync(
   const persistRecords = dependencies.persistRecords ?? persistSeaceRecords;
   const readLatestImportedObservedAt =
     dependencies.getLatestImportedObservedAt ?? getLatestImportedObservedAt;
+  const recalculateProfiles =
+    dependencies.recalculateAttentionProfiles ??
+    (async (personIds, currentDatabaseClient) => {
+      const module = await import("#api/modules/attention/service.ts");
+      return await module.recalculateAttentionProfiles(personIds, currentDatabaseClient);
+    });
 
   const datasets = await acquireDatasets(options);
   const normalized = normalizeDatasets(datasets);
@@ -158,8 +169,10 @@ export async function runSeaceSync(
       },
     },
   );
+  const affectedPersonIds = await recalculateProfiles(result.affectedPersonIds, databaseClient);
 
   return {
+    affectedPersonIds,
     errors: [...normalized.errors, ...result.errors],
     summary: result.summary,
   };

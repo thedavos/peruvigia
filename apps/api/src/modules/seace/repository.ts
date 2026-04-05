@@ -1,9 +1,9 @@
-import { and, eq, inArray, type InferSelectModel } from "drizzle-orm";
+import { and, eq, inArray, or, type InferSelectModel } from "drizzle-orm";
 
 import { stableStringify } from "@peruvigia/shared";
 
-import { db } from "#api/db/index.js";
-import { entities, people, personEntityLinks, sourceRecords } from "#api/db/schema.js";
+import { db } from "#api/db/index.ts";
+import { entities, people, personEntityLinks, sourceRecords } from "#api/db/schema.ts";
 import {
   SEACE_SOURCE_TYPE,
   type SeaceNormalizedAward,
@@ -12,7 +12,7 @@ import {
   type SeaceNormalizationResult,
   type SeaceSyncResult,
   type SeaceSyncSummary,
-} from "./types.js";
+} from "./types.ts";
 
 type DatabaseClient = typeof db;
 type TransactionClient = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -129,10 +129,11 @@ async function findOrCreatePerson(
 
 async function findOrCreateProviderEntity(
   tx: PersistenceClient,
-  provider: Pick<
-    SeaceNormalizedRnpLink | SeaceNormalizedAward,
-    "providerExternalId" | "providerName" | "normalizedProviderName"
-  >,
+  provider: {
+    normalizedProviderName: string;
+    providerExternalId: string;
+    providerName: string;
+  },
   cache: SeacePersistenceCache,
 ) {
   const entityType = inferProviderEntityType();
@@ -540,6 +541,38 @@ async function persistRnpLink(
     personId: person.id,
     sourceRecordId: persistedSourceRecord.id,
   });
+
+  return [person.id];
+}
+
+async function findAffectedPeopleByEntityExternalIdentifiers(
+  tx: PersistenceClient,
+  externalIdentifiers: string[],
+) {
+  if (externalIdentifiers.length === 0) {
+    return [];
+  }
+
+  const rows = await tx
+    .select({
+      personId: personEntityLinks.personId,
+    })
+    .from(personEntityLinks)
+    .innerJoin(entities, eq(personEntityLinks.entityId, entities.id))
+    .where(
+      and(
+        inArray(entities.externalIdentifier, externalIdentifiers),
+        or(
+          eq(personEntityLinks.linkType, "supplier_relationship"),
+          eq(personEntityLinks.linkType, "commercial"),
+          eq(personEntityLinks.linkType, "board_membership"),
+          eq(personEntityLinks.linkType, "employment"),
+          eq(personEntityLinks.linkType, "guild"),
+        ),
+      ),
+    );
+
+  return [...new Set(rows.map((row) => row.personId))];
 }
 
 async function persistAward(
@@ -614,6 +647,11 @@ async function persistAward(
   } else {
     summary.updated += 1;
   }
+
+  return await findAffectedPeopleByEntityExternalIdentifiers(tx, [
+    record.supplierExternalId,
+    record.contractingEntityExternalId,
+  ]);
 }
 
 async function persistContractingEntityRecord(
@@ -670,6 +708,8 @@ async function persistContractingEntityRecord(
   } else {
     summary.updated += 1;
   }
+
+  return await findAffectedPeopleByEntityExternalIdentifiers(tx, [record.entityExternalId]);
 }
 
 async function persistRecordBatch<T>(
@@ -680,17 +720,21 @@ async function persistRecordBatch<T>(
     record: T,
     cache: SeacePersistenceCache,
     summary: SeaceSyncSummary,
-  ) => Promise<void>,
+  ) => Promise<string[] | void>,
   cache: SeacePersistenceCache,
   summary: SeaceSyncSummary,
   errors: string[],
   describeRecord: (record: T) => string,
+  affectedPersonIds: Set<string>,
 ) {
   await databaseClient.transaction(async (batchTx) => {
     for (const record of batch) {
       try {
         await batchTx.transaction(async (recordTx) => {
-          await persistRecord(recordTx, record, cache, summary);
+          const nextAffectedPersonIds = await persistRecord(recordTx, record, cache, summary);
+          for (const personId of nextAffectedPersonIds ?? []) {
+            affectedPersonIds.add(personId);
+          }
         });
       } catch (error) {
         summary.failed += 1;
@@ -714,6 +758,7 @@ export async function persistSeaceRecords(
     ...emptySummary(),
     ...options?.initialSummary,
   };
+  const affectedPersonIds = new Set<string>();
   const errors: string[] = [];
 
   const uniqueRecords = {
@@ -753,6 +798,7 @@ export async function persistSeaceRecords(
       summary,
       errors,
       (record) => record.sourceExternalId,
+      affectedPersonIds,
     );
   }
 
@@ -765,6 +811,7 @@ export async function persistSeaceRecords(
       summary,
       errors,
       (record) => record.sourceExternalId,
+      affectedPersonIds,
     );
   }
 
@@ -777,10 +824,12 @@ export async function persistSeaceRecords(
       summary,
       errors,
       (record) => record.sourceExternalId,
+      affectedPersonIds,
     );
   }
 
   return {
+    affectedPersonIds: [...affectedPersonIds].sort((left, right) => left.localeCompare(right)),
     errors,
     summary,
   };

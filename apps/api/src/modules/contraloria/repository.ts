@@ -2,15 +2,15 @@ import { and, eq, inArray, type InferSelectModel } from "drizzle-orm";
 
 import { normalizeName, slugify, stableStringify } from "@peruvigia/shared";
 
-import { db } from "#api/db/index.js";
-import { entities, people, personEntityLinks, signals, sourceRecords } from "#api/db/schema.js";
-import { CONTRALORIA_SOURCE_TYPE } from "./types.js";
+import { db } from "#api/db/index.ts";
+import { entities, people, personEntityLinks, signals, sourceRecords } from "#api/db/schema.ts";
+import { CONTRALORIA_SOURCE_TYPE } from "./types.ts";
 import type {
   ContraloriaSyncResult,
   NormalizedSanctionRecord,
   PreparedSignal,
   SyncSummary,
-} from "./types.js";
+} from "./types.ts";
 
 type DatabaseClient = typeof db;
 type TransactionClient = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -391,7 +391,7 @@ async function syncSingleRecord(
     })
   ) {
     summary.reused += 1;
-    return;
+    return person;
   }
 
   const entity = await findOrCreateEntity(tx, record, cache);
@@ -460,6 +460,8 @@ async function syncSingleRecord(
     summary: signal.summary,
     title: signal.title,
   });
+
+  return person;
 }
 
 function chunkRecords<T>(records: T[], size: number) {
@@ -478,12 +480,14 @@ async function persistRecordBatch(
   cache: ContraloriaPersistenceCache,
   summary: SyncSummary,
   errors: string[],
+  affectedPersonIds: Set<string>,
 ) {
   await databaseClient.transaction(async (batchTx) => {
     for (const record of batch) {
       try {
         await batchTx.transaction(async (recordTx) => {
-          await syncSingleRecord(recordTx, record, cache, summary);
+          const person = await syncSingleRecord(recordTx, record, cache, summary);
+          affectedPersonIds.add(person.id);
         });
       } catch (error) {
         summary.failed += 1;
@@ -509,6 +513,7 @@ export async function persistContraloriaRecords(
     ...emptySummary(),
     ...options?.initialSummary,
   };
+  const affectedPersonIds = new Set<string>();
   const errors: string[] = [];
   const seenFingerprints = new Set<string>();
   const uniqueRecords: NormalizedSanctionRecord[] = [];
@@ -529,10 +534,11 @@ export async function persistContraloriaRecords(
   const batches = chunkRecords(uniqueRecords, CONTRALORIA_BATCH_SIZE);
 
   for (const batch of batches) {
-    await persistRecordBatch(databaseClient, batch, cache, summary, errors);
+    await persistRecordBatch(databaseClient, batch, cache, summary, errors, affectedPersonIds);
   }
 
   return {
+    affectedPersonIds: [...affectedPersonIds].sort((left, right) => left.localeCompare(right)),
     errors,
     summary,
   };

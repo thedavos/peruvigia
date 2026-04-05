@@ -1,16 +1,19 @@
+import { getAttentionProfile } from "#api/modules/attention/service.ts";
 import Fastify from "fastify";
 
-import { getEnv } from "#api/env.js";
-import { getContraloriaStatus } from "#api/modules/contraloria/service.js";
-import { getDjiContext } from "#api/modules/dji/service.js";
-import { getSeaceActivity } from "#api/modules/seace/service.js";
-import { registerContraloriaRoutes } from "#api/routes/contraloria.js";
-import { registerDjiRoutes } from "#api/routes/dji.js";
-import { registerHealthRoutes } from "#api/routes/health.js";
-import { registerSeaceRoutes } from "#api/routes/seace.js";
+import { getEnv } from "#api/env.ts";
+import { getContraloriaStatus } from "#api/modules/contraloria/service.ts";
+import { getDjiContext } from "#api/modules/dji/service.ts";
+import { getSeaceActivity } from "#api/modules/seace/service.ts";
+import { registerAttentionRoutes } from "#api/routes/attention.ts";
+import { registerContraloriaRoutes } from "#api/routes/contraloria.ts";
+import { registerDjiRoutes } from "#api/routes/dji.ts";
+import { registerHealthRoutes } from "#api/routes/health.ts";
+import { registerSeaceRoutes } from "#api/routes/seace.ts";
 
 type BuildAppOptions = {
   services?: {
+    getAttentionProfile?: typeof getAttentionProfile;
     getContraloriaStatus?: typeof getContraloriaStatus;
     getDjiContext?: typeof getDjiContext;
     getSeaceActivity?: typeof getSeaceActivity;
@@ -59,6 +62,9 @@ export async function buildApp(options: BuildAppOptions = {}) {
   });
 
   await registerHealthRoutes(app);
+  await registerAttentionRoutes(app, {
+    getAttentionProfile: options.services?.getAttentionProfile,
+  });
   await registerContraloriaRoutes(app, {
     getStatus: options.services?.getContraloriaStatus,
   });

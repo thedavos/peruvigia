@@ -79,6 +79,7 @@ export type PreparedSignal = {
 };
 
 export type ContraloriaSyncResult = {
+  affectedPersonIds: string[];
   errors: string[];
   summary: SyncSummary;
 };

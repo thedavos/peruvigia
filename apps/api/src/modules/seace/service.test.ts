@@ -1,5 +1,5 @@
-import { mapSeaceAwardActivityRecord, runSeaceSync } from "./service.js";
-import type { SeaceDownloadedDataset, SeaceNormalizationResult, SeaceSyncResult } from "./types.js";
+import { mapSeaceAwardActivityRecord, runSeaceSync } from "./service.ts";
+import type { SeaceDownloadedDataset, SeaceNormalizationResult, SeaceSyncResult } from "./types.ts";
 
 const fakeDatabaseClient = {} as never;
 
@@ -62,6 +62,7 @@ test("runSeaceSync merges normalization and persistence results", async () => {
   };
 
   const persisted: SeaceSyncResult = {
+    affectedPersonIds: ["aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"],
     errors: ["persistence warning"],
     summary: {
       downloaded: 3,
@@ -73,14 +74,21 @@ test("runSeaceSync merges normalization and persistence results", async () => {
       updated: 0,
     },
   };
+  const recalculatedCalls: string[][] = [];
 
   const result = await runSeaceSync({}, fakeDatabaseClient, {
     acquireDatasets: async () => datasets,
     getLatestImportedObservedAt: async () => null,
     normalizeDatasets: () => normalized,
     persistRecords: async (_records, _options) => persisted,
+    recalculateAttentionProfiles: async (personIds) => {
+      recalculatedCalls.push(personIds);
+      return personIds;
+    },
   });
 
+  expect(recalculatedCalls).toEqual([["aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"]]);
+  expect(result.affectedPersonIds).toEqual(["aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"]);
   expect(result.errors).toEqual(["normalization warning", "persistence warning"]);
   expect(result.summary).toEqual(persisted.summary);
 });

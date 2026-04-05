@@ -39,6 +39,7 @@ export type DjiSyncSummary = {
 };
 
 export type DjiSyncResult = {
+  affectedPersonIds: string[];
   errors: string[];
   summary: DjiSyncSummary;
 };

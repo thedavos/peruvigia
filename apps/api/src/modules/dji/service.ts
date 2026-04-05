@@ -7,20 +7,31 @@ import {
   type DjiContextResponse,
 } from "@peruvigia/shared";
 
-import { db } from "#api/db/index.js";
+import { db } from "#api/db/index.ts";
 import {
   entities,
   people,
   personEntityLinks,
   personPersonLinks,
   sourceRecords,
-} from "#api/db/schema.js";
-import { normalizeDjiDatasets } from "./normalize.js";
-import { persistDjiDeclarations } from "./repository.js";
-import { acquireDjiDatasets } from "./source.js";
-import { DJI_SOURCE_TYPE, type DjiAcquireOptions, type DjiSyncResult } from "./types.js";
+} from "#api/db/schema.ts";
+import { normalizeDjiDatasets } from "./normalize.ts";
+import { persistDjiDeclarations } from "./repository.ts";
+import { acquireDjiDatasets } from "./source.ts";
+import { DJI_SOURCE_TYPE, type DjiAcquireOptions, type DjiSyncResult } from "./types.ts";
 
 type DatabaseClient = typeof db;
+
+type DjiServiceDependencies = {
+  acquireDatasets?: typeof acquireDjiDatasets;
+  getLatestImportedObservedAt?: (databaseClient: DatabaseClient) => Promise<string | null>;
+  normalizeDatasets?: typeof normalizeDjiDatasets;
+  persistDeclarations?: typeof persistDjiDeclarations;
+  recalculateAttentionProfiles?: (
+    personIds: string[],
+    databaseClient: DatabaseClient,
+  ) => Promise<string[]>;
+};
 
 async function getLatestImportedObservedAt(databaseClient: DatabaseClient) {
   const [result] = await databaseClient
@@ -48,12 +59,25 @@ function getIncomingObservedAt(declarations: Array<{ observedAt: string }>) {
 export async function runDjiSync(
   options: DjiAcquireOptions = {},
   databaseClient: DatabaseClient = db,
+  dependencies: DjiServiceDependencies = {},
 ): Promise<DjiSyncResult> {
-  const datasets = await acquireDjiDatasets(options);
-  const normalized = normalizeDjiDatasets(datasets);
+  const acquireDatasets = dependencies.acquireDatasets ?? acquireDjiDatasets;
+  const normalizeDatasets = dependencies.normalizeDatasets ?? normalizeDjiDatasets;
+  const persistDeclarations = dependencies.persistDeclarations ?? persistDjiDeclarations;
+  const readLatestImportedObservedAt =
+    dependencies.getLatestImportedObservedAt ?? getLatestImportedObservedAt;
+  const recalculateProfiles =
+    dependencies.recalculateAttentionProfiles ??
+    (async (personIds, currentDatabaseClient) => {
+      const module = await import("#api/modules/attention/service.ts");
+      return await module.recalculateAttentionProfiles(personIds, currentDatabaseClient);
+    });
+
+  const datasets = await acquireDatasets(options);
+  const normalized = normalizeDatasets(datasets);
 
   const incomingObservedAt = getIncomingObservedAt(normalized.declarations);
-  const latestImportedObservedAt = await getLatestImportedObservedAt(databaseClient);
+  const latestImportedObservedAt = await readLatestImportedObservedAt(databaseClient);
 
   if (
     !options.allowBackfill &&
@@ -66,15 +90,17 @@ export async function runDjiSync(
     );
   }
 
-  const result = await persistDjiDeclarations(normalized.declarations, {
+  const result = await persistDeclarations(normalized.declarations, {
     databaseClient,
     initialSummary: {
       downloaded: datasets.length,
       skipped: normalized.skipped,
     },
   });
+  const affectedPersonIds = await recalculateProfiles(result.affectedPersonIds, databaseClient);
 
   return {
+    affectedPersonIds,
     errors: [...normalized.errors, ...result.errors],
     summary: result.summary,
   };

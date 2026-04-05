@@ -67,6 +67,7 @@ export type SeaceSyncSummary = {
 };
 
 export type SeaceSyncResult = {
+  affectedPersonIds: string[];
   errors: string[];
   summary: SeaceSyncSummary;
 };

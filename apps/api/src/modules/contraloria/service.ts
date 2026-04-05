@@ -9,15 +9,27 @@ import {
   type ContraloriaStatusSignal,
 } from "@peruvigia/shared";
 
-import { db } from "#api/db/index.js";
-import { people, signals, sourceRecords } from "#api/db/schema.js";
-import { CONTRALORIA_SOURCE_TYPE } from "./types.js";
-import { persistContraloriaRecords } from "./repository.js";
-import { acquireContraloriaAttachments } from "./source.js";
-import { normalizeParsedRow, parseAttachmentRows } from "./workbook.js";
-import type { AcquireOptions, ContraloriaSyncResult, NormalizedSanctionRecord } from "./types.js";
+import { db } from "#api/db/index.ts";
+import { people, signals, sourceRecords } from "#api/db/schema.ts";
+import { CONTRALORIA_SOURCE_TYPE } from "./types.ts";
+import { persistContraloriaRecords } from "./repository.ts";
+import { acquireContraloriaAttachments } from "./source.ts";
+import { normalizeParsedRow, parseAttachmentRows } from "./workbook.ts";
+import type { AcquireOptions, ContraloriaSyncResult, NormalizedSanctionRecord } from "./types.ts";
 
 type DatabaseClient = typeof db;
+
+type ContraloriaServiceDependencies = {
+  acquireAttachments?: typeof acquireContraloriaAttachments;
+  getLatestImportedReportDate?: (databaseClient: DatabaseClient) => Promise<string | null>;
+  normalizeRow?: typeof normalizeParsedRow;
+  parseRows?: typeof parseAttachmentRows;
+  persistRecords?: typeof persistContraloriaRecords;
+  recalculateAttentionProfiles?: (
+    personIds: string[],
+    databaseClient: DatabaseClient,
+  ) => Promise<string[]>;
+};
 
 async function getLatestImportedReportDate(databaseClient: DatabaseClient) {
   const [result] = await databaseClient
@@ -65,17 +77,31 @@ function toStatusSignal(signal: InferSelectModel<typeof signals>): ContraloriaSt
 export async function runContraloriaSync(
   options: AcquireOptions,
   databaseClient: DatabaseClient = db,
+  dependencies: ContraloriaServiceDependencies = {},
 ): Promise<ContraloriaSyncResult> {
-  const attachments = await acquireContraloriaAttachments(options);
+  const acquireAttachments = dependencies.acquireAttachments ?? acquireContraloriaAttachments;
+  const normalizeRow = dependencies.normalizeRow ?? normalizeParsedRow;
+  const parseRows = dependencies.parseRows ?? parseAttachmentRows;
+  const persistRecords = dependencies.persistRecords ?? persistContraloriaRecords;
+  const readLatestImportedReportDate =
+    dependencies.getLatestImportedReportDate ?? getLatestImportedReportDate;
+  const recalculateProfiles =
+    dependencies.recalculateAttentionProfiles ??
+    (async (personIds, currentDatabaseClient) => {
+      const module = await import("#api/modules/attention/service.ts");
+      return await module.recalculateAttentionProfiles(personIds, currentDatabaseClient);
+    });
+
+  const attachments = await acquireAttachments(options);
   const normalizedRecords: NormalizedSanctionRecord[] = [];
   const errors: string[] = [];
   let skipped = 0;
 
   for (const attachment of attachments) {
-    const parsedRows = await parseAttachmentRows(attachment);
+    const parsedRows = await parseRows(attachment);
 
     for (const row of parsedRows) {
-      const normalizedRow = normalizeParsedRow(row);
+      const normalizedRow = normalizeRow(row);
       if (!normalizedRow) {
         skipped += 1;
         continue;
@@ -86,7 +112,7 @@ export async function runContraloriaSync(
   }
 
   const incomingReportDate = getIncomingReportDate(normalizedRecords);
-  const latestImportedReportDate = await getLatestImportedReportDate(databaseClient);
+  const latestImportedReportDate = await readLatestImportedReportDate(databaseClient);
 
   if (
     !options.allowBackfill &&
@@ -99,17 +125,19 @@ export async function runContraloriaSync(
     );
   }
 
-  const result = await persistContraloriaRecords(normalizedRecords, {
+  const result = await persistRecords(normalizedRecords, {
     databaseClient,
     initialSummary: {
       downloaded: attachments.length,
       skipped,
     },
   });
+  const affectedPersonIds = await recalculateProfiles(result.affectedPersonIds, databaseClient);
 
   errors.push(...result.errors);
 
   return {
+    affectedPersonIds,
     errors,
     summary: result.summary,
   };
