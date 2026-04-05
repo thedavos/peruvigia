@@ -127,3 +127,34 @@ export type SeaceNormalizationResult = {
   rnpLinks: SeaceNormalizedRnpLink[];
   skipped: number;
 };
+
+export type SeaceActivityFilters = {
+  contractingEntityExternalId?: string;
+  limit?: number;
+  processExternalId?: string;
+  supplierDocumentNumber?: string;
+  supplierExternalId?: string;
+};
+
+export type SeaceActivityRecord = {
+  awardedAt: string | null;
+  contractingEntity: {
+    externalIdentifier: string;
+    name: string;
+  };
+  currency: string | null;
+  objectDescription: string | null;
+  observedAt: string;
+  processExternalId: string;
+  processType: string | null;
+  sourceExternalId: string;
+  sourceRecordId: string;
+  sourceUrl: string | null;
+  status: string | null;
+  supplier: {
+    documentNumber: string | null;
+    externalIdentifier: string;
+    name: string;
+  };
+  totalAmount: number | null;
+};

@@ -1,4 +1,4 @@
-import { runSeaceSync } from "./service.js";
+import { mapSeaceAwardActivityRecord, runSeaceSync } from "./service.js";
 import type { SeaceDownloadedDataset, SeaceNormalizationResult, SeaceSyncResult } from "./types.js";
 
 const fakeDatabaseClient = {} as never;
@@ -121,4 +121,51 @@ test("runSeaceSync rejects older evidence unless allowBackfill is set", async ()
       },
     }),
   ).rejects.toThrow("Refusing to import SEACE records dated 2026-04-01");
+});
+
+test("mapSeaceAwardActivityRecord projects persisted award payloads into a simplified view", () => {
+  const result = mapSeaceAwardActivityRecord({
+    importedAt: new Date("2026-04-05T15:00:00.000Z"),
+    normalizedPayload: {
+      awardedAt: "2026-04-01",
+      contractingEntityExternalId: "0001",
+      contractingEntityName: "Municipalidad de Lima",
+      currency: "PEN",
+      objectDescription: "Servicio de mantenimiento",
+      processExternalId: "AS-2026-001",
+      processType: "Adjudicación Simplificada",
+      status: "Consentido",
+      supplierDocumentNumber: "20123456789",
+      supplierExternalId: "20123456789",
+      supplierName: "Acme SAC",
+      totalAmount: 125000.5,
+    },
+    observedAt: new Date("2026-04-05T00:00:00.000Z"),
+    sourceExternalId: "seace:award:1",
+    sourceRecordId: "11111111-1111-4111-8111-111111111111",
+    sourceUrl: "https://example.com/awards.xlsx",
+  });
+
+  expect(result).toEqual({
+    awardedAt: "2026-04-01",
+    contractingEntity: {
+      externalIdentifier: "0001",
+      name: "Municipalidad de Lima",
+    },
+    currency: "PEN",
+    objectDescription: "Servicio de mantenimiento",
+    observedAt: "2026-04-05T00:00:00.000Z",
+    processExternalId: "AS-2026-001",
+    processType: "Adjudicación Simplificada",
+    sourceExternalId: "seace:award:1",
+    sourceRecordId: "11111111-1111-4111-8111-111111111111",
+    sourceUrl: "https://example.com/awards.xlsx",
+    status: "Consentido",
+    supplier: {
+      documentNumber: "20123456789",
+      externalIdentifier: "20123456789",
+      name: "Acme SAC",
+    },
+    totalAmount: 125000.5,
+  });
 });

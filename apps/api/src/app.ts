@@ -3,14 +3,17 @@ import Fastify from "fastify";
 import { getEnv } from "#api/env.js";
 import { getContraloriaStatus } from "#api/modules/contraloria/service.js";
 import { getDjiContext } from "#api/modules/dji/service.js";
+import { getSeaceActivity } from "#api/modules/seace/service.js";
 import { registerContraloriaRoutes } from "#api/routes/contraloria.js";
 import { registerDjiRoutes } from "#api/routes/dji.js";
 import { registerHealthRoutes } from "#api/routes/health.js";
+import { registerSeaceRoutes } from "#api/routes/seace.js";
 
 type BuildAppOptions = {
   services?: {
     getContraloriaStatus?: typeof getContraloriaStatus;
     getDjiContext?: typeof getDjiContext;
+    getSeaceActivity?: typeof getSeaceActivity;
   };
 };
 
@@ -61,6 +64,9 @@ export async function buildApp(options: BuildAppOptions = {}) {
   });
   await registerDjiRoutes(app, {
     getContext: options.services?.getDjiContext,
+  });
+  await registerSeaceRoutes(app, {
+    getActivity: options.services?.getSeaceActivity,
   });
 
   app.get("/openapi.json", async () => app.swagger());

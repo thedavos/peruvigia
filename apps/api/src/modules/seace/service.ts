@@ -1,13 +1,19 @@
-import { eq, max } from "drizzle-orm";
+import { and, desc, eq, max, sql } from "drizzle-orm";
 
-import { formatIsoDate } from "@peruvigia/shared";
+import { formatIsoDate, readRecordString } from "@peruvigia/shared";
 
 import { db } from "#api/db/index.js";
 import { sourceRecords } from "#api/db/schema.js";
 import { normalizeSeaceDatasets } from "./normalize.js";
 import { persistSeaceRecords } from "./repository.js";
 import { acquireSeaceDatasets } from "./source.js";
-import { SEACE_SOURCE_TYPE, type SeaceAcquireOptions, type SeaceSyncResult } from "./types.js";
+import {
+  SEACE_SOURCE_TYPE,
+  type SeaceAcquireOptions,
+  type SeaceActivityFilters,
+  type SeaceActivityRecord,
+  type SeaceSyncResult,
+} from "./types.js";
 
 type DatabaseClient = typeof db;
 
@@ -27,6 +33,68 @@ async function getLatestImportedObservedAt(databaseClient: DatabaseClient) {
     .where(eq(sourceRecords.sourceType, SEACE_SOURCE_TYPE));
 
   return result?.latestObservedAt ? formatIsoDate(result.latestObservedAt) : null;
+}
+
+type SeaceActivitySourceRow = {
+  importedAt: Date;
+  normalizedPayload: Record<string, unknown> | null;
+  observedAt: Date | null;
+  sourceExternalId: string | null;
+  sourceRecordId: string;
+  sourceUrl: string | null;
+};
+
+function readRecordNumber(record: Record<string, unknown>, key: string) {
+  const value = record[key];
+  return typeof value === "number" ? value : null;
+}
+
+export function mapSeaceAwardActivityRecord(
+  row: SeaceActivitySourceRow,
+): SeaceActivityRecord | null {
+  if (!row.normalizedPayload) {
+    return null;
+  }
+
+  const payload = row.normalizedPayload;
+  const processExternalId = readRecordString(payload, "processExternalId");
+  const supplierExternalId = readRecordString(payload, "supplierExternalId");
+  const supplierName = readRecordString(payload, "supplierName");
+  const contractingEntityExternalId = readRecordString(payload, "contractingEntityExternalId");
+  const contractingEntityName = readRecordString(payload, "contractingEntityName");
+
+  if (
+    !processExternalId ||
+    !supplierExternalId ||
+    !supplierName ||
+    !contractingEntityExternalId ||
+    !contractingEntityName
+  ) {
+    return null;
+  }
+
+  return {
+    awardedAt: readRecordString(payload, "awardedAt"),
+    contractingEntity: {
+      externalIdentifier: contractingEntityExternalId,
+      name: contractingEntityName,
+    },
+    currency: readRecordString(payload, "currency"),
+    objectDescription: readRecordString(payload, "objectDescription"),
+    observedAt: row.observedAt?.toISOString() ?? row.importedAt.toISOString(),
+    processExternalId,
+    processType: readRecordString(payload, "processType"),
+    sourceExternalId: row.sourceExternalId ?? row.sourceRecordId,
+    sourceRecordId: row.sourceRecordId,
+    sourceUrl: row.sourceUrl,
+    status: readRecordString(payload, "status"),
+    supplier: {
+      documentNumber: readRecordString(payload, "supplierDocumentNumber"),
+      externalIdentifier: supplierExternalId,
+      name: supplierName,
+    },
+    totalAmount: readRecordNumber(payload, "totalAmount"),
+  };
 }
 
 function getIncomingObservedAt(
@@ -95,6 +163,59 @@ export async function runSeaceSync(
     errors: [...normalized.errors, ...result.errors],
     summary: result.summary,
   };
+}
+
+export async function getSeaceActivity(
+  filters: SeaceActivityFilters = {},
+  databaseClient: DatabaseClient = db,
+): Promise<SeaceActivityRecord[]> {
+  const limit = Math.min(Math.max(filters.limit ?? 100, 1), 500);
+  const conditions = [
+    eq(sourceRecords.sourceType, SEACE_SOURCE_TYPE),
+    eq(sourceRecords.sourceCategory, "awards"),
+  ];
+
+  if (filters.supplierDocumentNumber) {
+    conditions.push(
+      sql`${sourceRecords.normalizedPayload} ->> 'supplierDocumentNumber' = ${filters.supplierDocumentNumber}`,
+    );
+  }
+
+  if (filters.supplierExternalId) {
+    conditions.push(
+      sql`${sourceRecords.normalizedPayload} ->> 'supplierExternalId' = ${filters.supplierExternalId}`,
+    );
+  }
+
+  if (filters.contractingEntityExternalId) {
+    conditions.push(
+      sql`${sourceRecords.normalizedPayload} ->> 'contractingEntityExternalId' = ${filters.contractingEntityExternalId}`,
+    );
+  }
+
+  if (filters.processExternalId) {
+    conditions.push(
+      sql`${sourceRecords.normalizedPayload} ->> 'processExternalId' = ${filters.processExternalId}`,
+    );
+  }
+
+  const rows = await databaseClient
+    .select({
+      importedAt: sourceRecords.importedAt,
+      normalizedPayload: sourceRecords.normalizedPayload,
+      observedAt: sourceRecords.observedAt,
+      sourceExternalId: sourceRecords.sourceExternalId,
+      sourceRecordId: sourceRecords.id,
+      sourceUrl: sourceRecords.sourceUrl,
+    })
+    .from(sourceRecords)
+    .where(and(...conditions))
+    .orderBy(desc(sourceRecords.observedAt), desc(sourceRecords.importedAt))
+    .limit(limit);
+
+  return rows
+    .map(mapSeaceAwardActivityRecord)
+    .filter((record): record is SeaceActivityRecord => record != null);
 }
 
 export { getIncomingObservedAt, getLatestImportedObservedAt };
